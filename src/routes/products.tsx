@@ -1,0 +1,14 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
+import { FinalCTA, PageHero, Reveal, productsImage, materialsImage, manufacturingImage, heroImage } from "@/components/site";
+
+export const Route = createFileRoute("/products")({head:()=>({meta:[{title:"Products | EVERGREENINDUSTRY"},{name:"description",content:"Explore biodegradable bags and compostable packaging solutions."},{property:"og:title",content:"Sustainable Products | EVERGREENINDUSTRY"},{property:"og:description",content:"Packaging solutions for modern responsible businesses."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Products});
+const items=[
+  ["Biodegradable Carry Bags","Retail & everyday carry","Bio-based flexible film",heroImage],
+  ["Compostable Shopping Bags","Grocery & branded retail","Compostable material",productsImage],
+  ["Garbage / Waste Bags","Commercial waste handling","Responsible disposal",manufacturingImage],
+  ["Food & Packaging Solutions","Restaurants & takeaway","Food-use focused",materialsImage],
+  ["Compostable Packaging Products","Cross-industry packaging","Lower-impact choices",productsImage],
+  ["Sustainable Alternatives","Custom business needs","Material-led solutions",materialsImage],
+] as const;
+function Products(){return <><PageHero eyebrow="Our products" title="Performance, packed with purpose." copy="A versatile collection of sustainable packaging solutions for the ways modern businesses move, serve and operate." image={productsImage}/><section className="px-5 py-24 lg:px-10 lg:py-32"><div className="mx-auto grid max-w-[1450px] gap-7 md:grid-cols-2">{items.map(([name,app,material,img],i)=><Reveal key={name} delay={(i%2)*.08} className="group overflow-hidden rounded-[2rem] bg-card shadow-elevated"><div className="aspect-[16/10] overflow-hidden"><img src={img} loading="lazy" alt={name} width={1600} height={1200} className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"/></div><div className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 p-7 sm:p-9"><div className="min-w-0"><h2 className="text-3xl text-forest sm:text-4xl">{name}</h2><p className="mt-4 text-sm text-muted-foreground">Application · {app}</p><p className="mt-2 text-sm font-semibold text-moss">{material}</p><p className="mt-5 max-w-xl leading-7 text-muted-foreground">Practical, dependable packaging shaped around daily use and more responsible material thinking.</p></div><span className="grid size-12 shrink-0 place-items-center rounded-full bg-forest text-cream transition-transform group-hover:rotate-45"><ArrowUpRight/></span></div></Reveal>)}</div></section><FinalCTA/></>}
