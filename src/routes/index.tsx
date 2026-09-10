@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "motion/react";
-import { ArrowDown, ArrowRight, Check, Leaf, PackageOpen, Recycle } from "lucide-react";
+import { ArrowDown, ArrowRight, Check, Leaf, PackageOpen, Recycle, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Eyebrow, FinalCTA, ImagePanel, Metric, Reveal, SectionTitle, heroImage, manufacturingImage, productsImage } from "@/components/site";
 
@@ -51,7 +51,7 @@ function Index() {
       </div></section>
 
       <section className="px-5 py-24 lg:px-10 lg:py-36"><div className="mx-auto max-w-[1350px]"><SectionTitle eyebrow="Why Evergreen" title="Responsibility that performs." copy="We balance environmental intent with the quality, consistency and practical durability your operations demand."/><div className="mt-16 grid gap-px overflow-hidden rounded-[2rem] bg-border md:grid-cols-3">
-        {[ [Leaf,"Material intelligence","Thoughtful material choices for reduced conventional plastic dependency."],[Check,"Reliable quality","Consistent production standards built for daily commercial use."],[Recycle,"Circular thinking","A lifecycle-led approach from raw material to responsible disposal."]].map(([Icon,title,copy],i)=><Reveal key={String(title)} delay={i*.1} className="bg-background p-9"><Icon className="mb-10 size-7 text-moss"/><h3 className="text-3xl text-forest">{String(title)}</h3><p className="mt-4 leading-7 text-muted-foreground">{String(copy)}</p></Reveal>)}
+        {([ [Leaf,"Material intelligence","Thoughtful material choices for reduced conventional plastic dependency."],[Check,"Reliable quality","Consistent production standards built for daily commercial use."],[Recycle,"Circular thinking","A lifecycle-led approach from raw material to responsible disposal."]] as Array<[LucideIcon,string,string]>).map(([Icon,title,copy],i)=><Reveal key={title} delay={i*.1} className="bg-background p-9"><Icon className="mb-10 size-7 text-moss"/><h3 className="text-3xl text-forest">{title}</h3><p className="mt-4 leading-7 text-muted-foreground">{copy}</p></Reveal>)}
       </div></div></section>
 
       <section className="bg-secondary px-5 py-24 lg:px-10 lg:py-32"><div className="mx-auto grid max-w-[1450px] gap-14 lg:grid-cols-[1.1fr_.9fr] lg:items-center"><Reveal><Eyebrow>Responsible manufacturing</Eyebrow><h2 className="text-5xl leading-none text-forest sm:text-7xl">Precision, with a lighter footprint.</h2><p className="mt-7 max-w-xl leading-7 text-muted-foreground">Our manufacturing mindset connects material innovation, process discipline and quality control—so sustainable choices remain commercially practical.</p><div className="mt-10 grid grid-cols-3 gap-6"><Metric value="01" label="Material first"/><Metric value="02" label="Quality always"/><Metric value="03" label="Impact aware"/></div></Reveal><ImagePanel src={manufacturingImage} alt="Responsible packaging manufacturing" className="aspect-[4/5]"/></div></section>
