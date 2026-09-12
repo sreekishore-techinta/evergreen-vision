@@ -1,0 +1,35 @@
+# ============================================================
+# Backend API — Apache / XAMPP Protection
+# ============================================================
+
+# Deny direct access to config directory
+<IfModule mod_authz_core.c>
+  <FilesMatch "^config/">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+
+# Only allow access to /api/*.php files from local or allowed origins
+Options -Indexes
+
+# CORS handled by PHP — block browser direct access to config
+<FilesMatch "^(db|config|helpers)\.php$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>
+
+# Prevent access to database.sql
+<FilesMatch "\.sql$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+</IfModule>

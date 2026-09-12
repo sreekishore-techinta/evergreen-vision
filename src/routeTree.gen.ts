@@ -11,9 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ApplicationsRouteImport } from './routes/applications'
+import { Route as CertificateRouteImport } from './routes/certificate'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ProductsRouteImport } from './routes/products'
+import { Route as SegmentRouteImport } from './routes/segment'
 import { Route as SustainabilityRouteImport } from './routes/sustainability'
 import { Route as WhyEvergreenRouteImport } from './routes/why-evergreen'
 
@@ -27,9 +30,19 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApplicationsRoute = ApplicationsRouteImport.update({
   id: '/applications',
   path: '/applications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CertificateRoute = CertificateRouteImport.update({
+  id: '/certificate',
+  path: '/certificate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -40,6 +53,11 @@ const ContactRoute = ContactRouteImport.update({
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
   path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SegmentRoute = SegmentRouteImport.update({
+  id: '/segment',
+  path: '/segment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SustainabilityRoute = SustainabilityRouteImport.update({
@@ -56,18 +74,24 @@ const WhyEvergreenRoute = WhyEvergreenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/applications': typeof ApplicationsRoute
+  '/certificate': typeof CertificateRoute
   '/contact': typeof ContactRoute
   '/products': typeof ProductsRoute
+  '/segment': typeof SegmentRoute
   '/sustainability': typeof SustainabilityRoute
   '/why-evergreen': typeof WhyEvergreenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/applications': typeof ApplicationsRoute
+  '/certificate': typeof CertificateRoute
   '/contact': typeof ContactRoute
   '/products': typeof ProductsRoute
+  '/segment': typeof SegmentRoute
   '/sustainability': typeof SustainabilityRoute
   '/why-evergreen': typeof WhyEvergreenRoute
 }
@@ -75,9 +99,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/applications': typeof ApplicationsRoute
+  '/certificate': typeof CertificateRoute
   '/contact': typeof ContactRoute
   '/products': typeof ProductsRoute
+  '/segment': typeof SegmentRoute
   '/sustainability': typeof SustainabilityRoute
   '/why-evergreen': typeof WhyEvergreenRoute
 }
@@ -86,27 +113,36 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/applications'
+    | '/certificate'
     | '/contact'
     | '/products'
+    | '/segment'
     | '/sustainability'
     | '/why-evergreen'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/admin'
     | '/applications'
+    | '/certificate'
     | '/contact'
     | '/products'
+    | '/segment'
     | '/sustainability'
     | '/why-evergreen'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/applications'
+    | '/certificate'
     | '/contact'
     | '/products'
+    | '/segment'
     | '/sustainability'
     | '/why-evergreen'
   fileRoutesById: FileRoutesById
@@ -114,9 +150,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
   ApplicationsRoute: typeof ApplicationsRoute
+  CertificateRoute: typeof CertificateRoute
   ContactRoute: typeof ContactRoute
   ProductsRoute: typeof ProductsRoute
+  SegmentRoute: typeof SegmentRoute
   SustainabilityRoute: typeof SustainabilityRoute
   WhyEvergreenRoute: typeof WhyEvergreenRoute
 }
@@ -137,11 +176,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/applications': {
       id: '/applications'
       path: '/applications'
       fullPath: '/applications'
       preLoaderRoute: typeof ApplicationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/certificate': {
+      id: '/certificate'
+      path: '/certificate'
+      fullPath: '/certificate'
+      preLoaderRoute: typeof CertificateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -156,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/products'
       fullPath: '/products'
       preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/segment': {
+      id: '/segment'
+      path: '/segment'
+      fullPath: '/segment'
+      preLoaderRoute: typeof SegmentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sustainability': {
@@ -178,9 +238,12 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
   ApplicationsRoute: ApplicationsRoute,
+  CertificateRoute: CertificateRoute,
   ContactRoute: ContactRoute,
   ProductsRoute: ProductsRoute,
+  SegmentRoute: SegmentRoute,
   SustainabilityRoute: SustainabilityRoute,
   WhyEvergreenRoute: WhyEvergreenRoute,
 }
