@@ -1,0 +1,14 @@
+Options -MultiViews
+RewriteEngine On
+
+# Serve backend PHP files directly — never rewrite those
+RewriteCond %{REQUEST_URI} ^/backend/ [OR]
+RewriteCond %{REQUEST_URI} ^/uploads/
+RewriteRule ^ - [L]
+
+# Serve real files and directories directly (assets, images, videos, etc.)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# All other requests → index.html (SPA client-side routing)
+RewriteRule ^ index.html [L]

@@ -119,13 +119,23 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  // queryClient may be undefined in the static SPA build (provided externally)
+  const ctx = Route.useRouteContext();
+  const queryClient = ctx?.queryClient;
 
-  return (
-    <QueryClientProvider client={queryClient}>
+  const content = (
+    <>
       <SiteHeader />
       <Outlet />
       <SiteFooter />
-    </QueryClientProvider>
+    </>
+  );
+
+  // SSR / Lovable hosting: queryClient comes from context → wrap it
+  // Static SPA build: already wrapped in main.spa.tsx → render directly
+  return queryClient ? (
+    <QueryClientProvider client={queryClient}>{content}</QueryClientProvider>
+  ) : (
+    content
   );
 }
