@@ -18,10 +18,16 @@ export const Route = createFileRoute("/contact")({
   component: Contact,
 });
 
-// Detect XAMPP / static environment — API base
+// Detect live hosting or local — API base auto-detected
 const API_BASE =
   typeof window !== "undefined"
-    ? `${window.location.origin}/evergreen-vision/backend/api`
+    ? (() => {
+        const path = window.location.pathname;
+        const root = path.includes('/admin')
+          ? path.substring(0, path.indexOf('/admin'))
+          : path.replace(/\/[^/]*\.[^/]+$/, '').replace(/\/$/, '');
+        return `${window.location.origin}${root}/backend/api`;
+      })()
     : "/backend/api";
 
 type FormState = "idle" | "loading" | "success" | "error";

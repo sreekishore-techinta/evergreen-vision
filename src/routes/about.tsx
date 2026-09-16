@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Factory, Layers, Leaf, ShieldCheck, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
-import { ImagePanel, Metric, Reveal, SectionTitle, manufacturingImage, materialsImage } from "@/components/site";
+import { ImagePanel, Metric, Reveal, SectionTitle, materialsImage } from "@/components/site";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -67,7 +67,7 @@ function About() {
               </div>
             </div>
 
-            {/* Right Facility Image Showcase — 100% Bright, Crisp, Zero Dark Shades */}
+            {/* Right Facility Video Showcase — Premium Video Hero Card */}
             <div className="lg:col-span-6 relative">
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
@@ -75,17 +75,30 @@ function About() {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ y: -6, scale: 1.01 }}
                 style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-                className="group relative rounded-[2.5rem] overflow-hidden bg-white border border-white/80 shadow-[0_25px_60px_-15px_rgba(20,50,25,0.18),0_10px_25px_-10px_rgba(20,50,25,0.1)] aspect-[16/11]"
+                className="group relative rounded-[2.5rem] overflow-hidden bg-black border border-white/80 shadow-[0_25px_60px_-15px_rgba(20,50,25,0.28),0_10px_25px_-10px_rgba(20,50,25,0.15)] aspect-[16/11]"
               >
                 {/* Top specular highlight edge for 3D depth */}
                 <div className="absolute inset-x-0 top-0 h-px z-10 bg-gradient-to-r from-transparent via-white/80 to-transparent pointer-events-none" />
 
-                {/* Completely unshaded, full-color, bright manufacturing image */}
-                <img
-                  src={manufacturingImage}
-                  alt="Evergreen sustainable manufacturing facility in Tamil Nadu"
+                {/* Auto-play muted video */}
+                <video
+                  src="/about-hero.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
+
+                {/* Subtle vignette for depth without darkening */}
+                <div className="absolute inset-0 rounded-[2.5rem] shadow-[inset_0_0_60px_rgba(0,0,0,0.12)] pointer-events-none" />
+
+                {/* Live indicator — top right */}
+                <div className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20">
+                  <span className="size-1.5 rounded-full bg-red-400 animate-pulse" />
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-white/80">Live</span>
+                </div>
 
                 {/* Floating glass pill badge */}
                 <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-10 px-4 py-2 rounded-2xl bg-white/90 backdrop-blur-md border border-white/60 shadow-lg text-xs font-mono text-[#0e2617] flex items-center gap-2.5">

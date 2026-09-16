@@ -25,7 +25,7 @@ match ($action) {
 function list_categories(): void {
     $pdo  = db();
     $admin = is_logged_in();
-    $where = $admin ? '' : 'WHERE is_active = 1';
+    $where = $admin ? '' : 'WHERE c.is_active = 1';
     $rows  = $pdo->query(
         "SELECT c.*, COUNT(p.id) AS product_count
          FROM categories c

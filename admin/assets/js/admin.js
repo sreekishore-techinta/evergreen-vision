@@ -77,15 +77,16 @@ function confirmDelete(message = 'Are you sure you want to delete this? This can
 
 /* ── API wrapper ─────────────────────────────────────────── */
 const API = {
-  base: window.location.origin + (
-    // Auto-detect the project subfolder from the current URL
-    // e.g. http://localhost/evergreen-vision/admin/dashboard.php → /evergreen-vision
-    (function() {
-      const parts = window.location.pathname.split('/');
-      const idx   = parts.indexOf('admin');
-      return idx > 0 ? '/' + parts.slice(1, idx).join('/') : '';
-    })()
-  ) + '/backend/api',
+  base: (function() {
+    // Auto-detect API base from current page URL
+    // Works for any domain and any subfolder depth
+    // e.g. https://domain.com/admin/dashboard.php → https://domain.com/backend/api
+    // e.g. https://domain.com/mysite/admin/x.php  → https://domain.com/mysite/backend/api
+    const path    = window.location.pathname;
+    const adminIdx = path.lastIndexOf('/admin');
+    const root    = adminIdx > 0 ? path.substring(0, adminIdx) : '';
+    return window.location.origin + root + '/backend/api';
+  })(),
 
   async call(endpoint, params = {}, options = {}) {
     const url = new URL(`${this.base}/${endpoint}`);
@@ -177,12 +178,20 @@ function statusBadge(status) {
 /* ── Logout ──────────────────────────────────────────────── */
 async function doLogout() {
   if (!confirm('Log out of the admin panel?')) return;
+  // Detect base path from current URL
+  // e.g. https://domain.com/admin/dashboard.php  → adminBase = /admin
+  //      https://domain.com/mysite/admin/dashboard.php → adminBase = /mysite/admin
+  const adminBase = window.location.pathname.substring(
+    0, window.location.pathname.lastIndexOf('/admin/') + 7
+  ).replace(/\/$/, '');  // strip trailing slash
+  const apiBase = adminBase.replace(/\/admin$/, '') + '/backend/api';
+
   try {
-    await fetch(window.location.origin + '/evergreen-vision/backend/api/auth.php?action=logout', {
+    await fetch(apiBase + '/auth.php?action=logout', {
       method: 'POST', credentials: 'include'
     });
   } catch(_) {}
-  window.location.href = window.location.origin + '/evergreen-vision/admin/login.php';
+  window.location.href = adminBase + '/login.php';
 }
 
 /* ── Init ────────────────────────────────────────────────── */

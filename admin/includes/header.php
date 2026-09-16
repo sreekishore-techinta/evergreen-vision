@@ -1,11 +1,14 @@
 <?php
-// Usage: include after auth_check.php
-// $page_title must be set before including this file
+// ── header.php ────────────────────────────────────────────────
+// Included by admin/*.php pages (one level above this includes/ dir)
+// $page_title and $breadcrumbs must be set before including.
+// BASE_URL / ADMIN_URL / API_URL are defined in config.php (loaded via auth_check.php).
 $page_title  = $page_title  ?? 'Admin';
 $breadcrumbs = $breadcrumbs ?? [];
 
-// ADMIN_URL and BASE_URL are defined in backend/config/config.php (included via auth_check.php)
-$assets_url = ADMIN_URL . '/assets';
+// Asset path relative to admin/*.php — always correct regardless of domain/subfolder
+// admin/dashboard.php → assets/css/admin.css  ✓
+$rel_assets = 'assets';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,8 +17,8 @@ $assets_url = ADMIN_URL . '/assets';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title><?= htmlspecialchars($page_title) ?> — Evergreen Admin</title>
-  <link rel="icon" href="<?= BASE_URL ?>/public/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="<?= $assets_url ?>/css/admin.css">
+  <link rel="icon" href="<?= $rel_assets ?>/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="<?= $rel_assets ?>/css/admin.css">
 </head>
 <body>
 <div class="admin-shell">
@@ -31,7 +34,7 @@ $assets_url = ADMIN_URL . '/assets';
       </svg>
     </button>
     <div class="breadcrumb">
-      <a href="<?= ADMIN_URL ?>/dashboard.php">Admin</a>
+      <a href="dashboard.php">Admin</a>
       <?php foreach ($breadcrumbs as $bc): ?>
         <span style="opacity:.4">›</span>
         <?php if (!empty($bc[1])): ?>

@@ -8,8 +8,8 @@ if (is_logged_in()) {
     exit;
 }
 
-// Absolute asset base for this page
-$assets_url = ADMIN_URL . '/assets';
+// login.php lives at admin/login.php — assets are always relative
+// No PHP URL needed; browser resolves assets/css/admin.css from admin/
 
 $error   = '';
 $success = '';
@@ -56,8 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin Login — Evergreen Industry</title>
-  <link rel="icon" href="<?= BASE_URL ?>/public/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="<?= $assets_url ?>/css/admin.css">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
 <div class="login-page">
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <div class="login-footer">
-      &larr; <a href="<?= BASE_URL ?>">Back to website</a>
+      &larr; <a href="../">Back to website</a>
       &nbsp;&nbsp;·&nbsp;&nbsp;
       Default: <strong>admin</strong> / <strong>Admin@1234</strong>
     </div>

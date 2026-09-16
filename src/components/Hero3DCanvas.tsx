@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-export function Hero3DCanvas() {
+export function Hero3DCanvas({ className = "" }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -13,7 +13,7 @@ export function Hero3DCanvas() {
     const scene = new THREE.Scene();
     // NO fog – let the CSS background show cleanly through alpha renderer
 
-    const width  = container.clientWidth  || window.innerWidth;
+    const width = container.clientWidth || window.innerWidth;
     const height = container.clientHeight || window.innerHeight;
 
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
@@ -21,7 +21,7 @@ export function Hero3DCanvas() {
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      alpha: true,                    // transparent canvas – background shows through
+      alpha: true, // transparent canvas – background shows through
       powerPreference: "high-performance",
     });
     renderer.setSize(width, height);
@@ -29,7 +29,7 @@ export function Hero3DCanvas() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.55;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
 
     container.appendChild(renderer.domElement);
     setIsReady(true);
@@ -59,7 +59,8 @@ export function Hero3DCanvas() {
 
     /* ── BAG TEXTURE (canvas) ───────────────────────────────────────── */
     const tc = document.createElement("canvas");
-    tc.width = 1024; tc.height = 1024;
+    tc.width = 1024;
+    tc.height = 1024;
     const ctx = tc.getContext("2d")!;
 
     // Pure warm ivory base
@@ -84,8 +85,11 @@ export function Hero3DCanvas() {
     ctx.fillStyle = "rgba(35, 68, 45, 0.88)";
     ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(0, -44); ctx.lineTo(0, 44);
-    ctx.strokeStyle = "#f8f3ea"; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.moveTo(0, -44);
+    ctx.lineTo(0, 44);
+    ctx.strokeStyle = "#f8f3ea";
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
     ctx.restore();
 
     ctx.textAlign = "center";
@@ -106,30 +110,35 @@ export function Hero3DCanvas() {
 
     /* ── BAG GEOMETRY ───────────────────────────────────────────────── */
     const bagGroup = new THREE.Group();
-    const BW = 2.1, BH = 2.7, BD = 0.72;
+    const BW = 2.1,
+      BH = 2.7,
+      BD = 0.72;
 
     const bagGeo = new THREE.BoxGeometry(BW, BH, BD, 48, 64, 24);
-    const pos = bagGeo.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-      const hN = (y + BH / 2) / BH;
-      let dz = 0;
-      if (Math.abs(x) > BW * 0.45 && hN > 0.1 && hN < 0.9)
-        dz -= Math.sin(hN * Math.PI) * 0.08 * Math.cos(z * 4);
-      if (hN < 0.25)
-        dz += Math.sin((1 - hN / 0.25) * Math.PI * 0.5) * 0.04;
-      const noise =
-        Math.sin(x * 6 + y * 5) * 0.014 +
-        Math.cos(y * 8 + z * 6) * 0.012 +
-        Math.sin((x + z) * 10) * 0.007;
-      pos.setXYZ(i, x, y, z + dz + noise);
+    const pos = bagGeo.attributes["position"];
+    if (pos) {
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i),
+          y = pos.getY(i),
+          z = pos.getZ(i);
+        const hN = (y + BH / 2) / BH;
+        let dz = 0;
+        if (Math.abs(x) > BW * 0.45 && hN > 0.1 && hN < 0.9)
+          dz -= Math.sin(hN * Math.PI) * 0.08 * Math.cos(z * 4);
+        if (hN < 0.25) dz += Math.sin((1 - hN / 0.25) * Math.PI * 0.5) * 0.04;
+        const noise =
+          Math.sin(x * 6 + y * 5) * 0.014 +
+          Math.cos(y * 8 + z * 6) * 0.012 +
+          Math.sin((x + z) * 10) * 0.007;
+        pos.setXYZ(i, x, y, z + dz + noise);
+      }
     }
     bagGeo.computeVertexNormals();
 
     // Clean ivory physical material – NOT green-tinted
     const bagMat = new THREE.MeshPhysicalMaterial({
       map: bagTexture,
-      color: 0xfff8f0,           // warm ivory, never green
+      color: 0xfff8f0, // warm ivory, never green
       roughness: 0.58,
       metalness: 0.0,
       clearcoat: 0.12,
@@ -146,14 +155,18 @@ export function Hero3DCanvas() {
 
     /* ── D-CUT HANDLE ────────────────────────────────────────────────── */
     const hShape = new THREE.Shape();
-    const hw = 0.45, hh = 0.16, hr = 0.08;
+    const hw = 0.45,
+      hh = 0.16,
+      hr = 0.08;
     hShape.moveTo(-hw + hr, -hh);
     hShape.lineTo(hw - hr, -hh);
     hShape.absarc(hw - hr, 0, hr, -Math.PI / 2, Math.PI / 2, false);
     hShape.lineTo(-hw + hr, hh);
     hShape.absarc(-hw + hr, 0, hr, Math.PI / 2, (3 * Math.PI) / 2, false);
     const hHole = new THREE.Path();
-    const iw = hw - 0.04, ih = hh - 0.04, ir = hr - 0.02;
+    const iw = hw - 0.04,
+      ih = hh - 0.04,
+      ir = hr - 0.02;
     hHole.moveTo(-iw + ir, -ih);
     hHole.lineTo(iw - ir, -ih);
     hHole.absarc(iw - ir, 0, ir, -Math.PI / 2, Math.PI / 2, false);
@@ -161,8 +174,12 @@ export function Hero3DCanvas() {
     hHole.absarc(-iw + ir, 0, ir, Math.PI / 2, (3 * Math.PI) / 2, false);
     hShape.holes.push(hHole);
     const hGeo = new THREE.ExtrudeGeometry(hShape, {
-      depth: 0.04, bevelEnabled: true, bevelSegments: 3,
-      steps: 1, bevelSize: 0.015, bevelThickness: 0.015,
+      depth: 0.04,
+      bevelEnabled: true,
+      bevelSegments: 3,
+      steps: 1,
+      bevelSize: 0.015,
+      bevelThickness: 0.015,
     });
     hGeo.center();
     const hMat = new THREE.MeshStandardMaterial({ color: 0x1e3a28, roughness: 0.5 });
@@ -175,17 +192,17 @@ export function Hero3DCanvas() {
 
     /* ── LOOP HANDLES ────────────────────────────────────────────────── */
     const lc1 = new THREE.CubicBezierCurve3(
-      new THREE.Vector3(-0.45, BH * 0.42,  BD * 0.35),
-      new THREE.Vector3(-0.35, BH * 0.78,  BD * 0.38),
-      new THREE.Vector3( 0.35, BH * 0.78,  BD * 0.38),
-      new THREE.Vector3( 0.45, BH * 0.42,  BD * 0.35)
+      new THREE.Vector3(-0.45, BH * 0.42, BD * 0.35),
+      new THREE.Vector3(-0.35, BH * 0.78, BD * 0.38),
+      new THREE.Vector3(0.35, BH * 0.78, BD * 0.38),
+      new THREE.Vector3(0.45, BH * 0.42, BD * 0.35),
     );
     bagGroup.add(new THREE.Mesh(new THREE.TubeGeometry(lc1, 40, 0.034, 12, false), bagMat));
     const lc2 = new THREE.CubicBezierCurve3(
       new THREE.Vector3(-0.45, BH * 0.42, -BD * 0.35),
       new THREE.Vector3(-0.35, BH * 0.78, -BD * 0.38),
-      new THREE.Vector3( 0.35, BH * 0.78, -BD * 0.38),
-      new THREE.Vector3( 0.45, BH * 0.42, -BD * 0.35)
+      new THREE.Vector3(0.35, BH * 0.78, -BD * 0.38),
+      new THREE.Vector3(0.45, BH * 0.42, -BD * 0.35),
     );
     bagGroup.add(new THREE.Mesh(new THREE.TubeGeometry(lc2, 40, 0.034, 12, false), bagMat));
 
@@ -204,14 +221,35 @@ export function Hero3DCanvas() {
     leafGeo.center();
 
     const leafMats = [
-      new THREE.MeshStandardMaterial({ color: 0x5a8e60, roughness: 0.55, transparent: true, opacity: 0.38, side: THREE.DoubleSide }),
-      new THREE.MeshStandardMaterial({ color: 0x3a6344, roughness: 0.5,  transparent: true, opacity: 0.30, side: THREE.DoubleSide }),
-      new THREE.MeshStandardMaterial({ color: 0x8ab08e, roughness: 0.6,  transparent: true, opacity: 0.28,  side: THREE.DoubleSide }),
+      new THREE.MeshStandardMaterial({
+        color: 0x5a8e60,
+        roughness: 0.55,
+        transparent: true,
+        opacity: 0.38,
+        side: THREE.DoubleSide,
+      }),
+      new THREE.MeshStandardMaterial({
+        color: 0x3a6344,
+        roughness: 0.5,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.DoubleSide,
+      }),
+      new THREE.MeshStandardMaterial({
+        color: 0x8ab08e,
+        roughness: 0.6,
+        transparent: true,
+        opacity: 0.28,
+        side: THREE.DoubleSide,
+      }),
     ];
 
     interface LeafData {
-      mesh: THREE.Mesh; speedY: number;
-      rotX: number; rotY: number; rotZ: number;
+      mesh: THREE.Mesh;
+      speedY: number;
+      rotX: number;
+      rotY: number;
+      rotZ: number;
       driftPhase: number;
     }
     const leaves: LeafData[] = [];
@@ -224,12 +262,12 @@ export function Hero3DCanvas() {
       leaf.position.set(
         (Math.random() - 0.5) * 14,
         (Math.random() - 0.5) * 9,
-        (Math.random() - 0.5) * 5 - 2
+        (Math.random() - 0.5) * 5 - 2,
       );
       leaf.rotation.set(
         Math.random() * Math.PI * 2,
         Math.random() * Math.PI * 2,
-        Math.random() * Math.PI * 2
+        Math.random() * Math.PI * 2,
       );
       scene.add(leaf);
       leaves.push({
@@ -247,24 +285,33 @@ export function Hero3DCanvas() {
     const pGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(pCount * 3);
     for (let i = 0; i < pCount * 3; i += 3) {
-      pPos[i]     = (Math.random() - 0.5) * 16;
+      pPos[i] = (Math.random() - 0.5) * 16;
       pPos[i + 1] = (Math.random() - 0.5) * 11;
       pPos[i + 2] = (Math.random() - 0.5) * 8;
     }
     pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
-    const pMat = new THREE.PointsMaterial({ color: 0xf5ede0, size: 0.022, transparent: true, opacity: 0.28 });
+    const pMat = new THREE.PointsMaterial({
+      color: 0xf5ede0,
+      size: 0.022,
+      transparent: true,
+      opacity: 0.28,
+    });
     const particles = new THREE.Points(pGeo, pMat);
     scene.add(particles);
 
     /* ── MOUSE PARALLAX ─────────────────────────────────────────────── */
-    let tRotX = 0.06, tRotY = -0.28, tPosX = 1.5, tPosY = -0.15;
-    let mX = 0, mY = 0;
+    let tRotX = 0.06,
+      tRotY = -0.28,
+      tPosX = 1.5,
+      tPosY = -0.15;
+    let mX = 0,
+      mY = 0;
 
     const onMouse = (e: MouseEvent) => {
-      mX = (e.clientX / window.innerWidth)  * 2 - 1;
+      mX = (e.clientX / window.innerWidth) * 2 - 1;
       mY = -(e.clientY / window.innerHeight) * 2 + 1;
       tRotY = -0.28 + mX * 0.28;
-      tRotX =  0.06 - mY * 0.2;
+      tRotX = 0.06 - mY * 0.2;
       tPosX = window.innerWidth >= 768 ? 1.5 + mX * 0.32 : 0;
       tPosY = -0.15 + mY * 0.22;
     };
@@ -273,17 +320,20 @@ export function Hero3DCanvas() {
     /* ── RESIZE ─────────────────────────────────────────────────────── */
     const onResize = () => {
       if (!container) return;
-      const nw = container.clientWidth, nh = container.clientHeight;
+      const nw = container.clientWidth,
+        nh = container.clientHeight;
       camera.aspect = nw / nh;
       camera.updateProjectionMatrix();
       renderer.setSize(nw, nh);
       if (nw < 768) {
         bagGroup.scale.setScalar(0.72);
         bagGroup.position.set(0, -0.5, 0);
-        tPosX = 0; tPosY = -0.5;
+        tPosX = 0;
+        tPosY = -0.5;
       } else {
         bagGroup.scale.setScalar(1);
-        tPosX = 1.5; tPosY = -0.15;
+        tPosX = 1.5;
+        tPosY = -0.15;
       }
     };
     window.addEventListener("resize", onResize);
@@ -291,11 +341,12 @@ export function Hero3DCanvas() {
 
     /* ── ANIMATION ──────────────────────────────────────────────────── */
     let rafId: number;
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
 
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
+      timer.update();
+      const t = timer.getElapsed();
 
       // Bag – gentle float
       const fY = Math.sin(t * 1.1) * 0.07;
@@ -337,11 +388,17 @@ export function Hero3DCanvas() {
       window.removeEventListener("mousemove", onMouse);
       window.removeEventListener("resize", onResize);
       cancelAnimationFrame(rafId);
+      timer.dispose();
       renderer.dispose();
-      bagGeo.dispose(); bagMat.dispose(); hGeo.dispose(); hMat.dispose();
-      bagTexture.dispose(); leafGeo.dispose();
+      bagGeo.dispose();
+      bagMat.dispose();
+      hGeo.dispose();
+      hMat.dispose();
+      bagTexture.dispose();
+      leafGeo.dispose();
       leafMats.forEach((m) => m.dispose());
-      pGeo.dispose(); pMat.dispose();
+      pGeo.dispose();
+      pMat.dispose();
       if (renderer.domElement && container.contains(renderer.domElement))
         container.removeChild(renderer.domElement);
     };
@@ -350,7 +407,7 @@ export function Hero3DCanvas() {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 z-10 pointer-events-none overflow-hidden"
+      className={`absolute inset-0 z-10 pointer-events-none overflow-hidden ${className}`}
       style={{ opacity: isReady ? 1 : 0, transition: "opacity 1.4s ease" }}
     />
   );

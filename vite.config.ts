@@ -12,4 +12,23 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      proxy: {
+        // Forward PHP backend calls from Vite dev port → XAMPP Apache (port 80)
+        // Use 127.0.0.1 explicitly to force IPv4 — avoids 502 when Node resolves
+        // "localhost" to ::1 (IPv6) but Apache listens only on IPv4.
+        "/backend": {
+          target: "http://127.0.0.1/evergreen-vision",
+          changeOrigin: true,
+          secure: false,
+        },
+        "/uploads": {
+          target: "http://127.0.0.1/evergreen-vision",
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
+  },
 });

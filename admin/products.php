@@ -354,21 +354,12 @@ include __DIR__ . '/includes/header.php';
         <div class="form-hint">Recommended: 800×600px or 16:10 ratio · Replaces existing image when changed</div>
       </div>
 
-      <!-- Certifications + Sort -->
-      <div class="grid-2">
-        <div class="form-group">
-          <label class="form-label">Certifications</label>
-          <input type="text" name="certifications" class="form-control"
-                 value="<?= htmlspecialchars($edit_row['certifications'] ?? '') ?>"
-                 placeholder="EN 13432, ASTM D6400, CPCB">
-          <div class="form-hint">Comma-separated</div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Sort Order</label>
-          <input type="number" name="sort_order" class="form-control" min="0"
-                 value="<?= (int)($edit_row['sort_order'] ?? 0) ?>">
-          <div class="form-hint">Lower = shown first</div>
-        </div>
+      <!-- Sort Order -->
+      <div class="form-group" style="max-width:260px">
+        <label class="form-label">Sort Order</label>
+        <input type="number" name="sort_order" class="form-control" min="0"
+               value="<?= (int)($edit_row['sort_order'] ?? 0) ?>">
+        <div class="form-hint">Lower = shown first</div>
       </div>
 
       <!-- Toggles -->
@@ -431,7 +422,7 @@ include __DIR__ . '/includes/header.php';
           <th style="width:70px">Image</th>
           <th>Name</th>
           <th>Category</th>
-          <th>Certifications</th>
+
           <th>Featured</th>
           <th>Status</th>
           <th>Order</th>
@@ -463,7 +454,7 @@ include __DIR__ . '/includes/header.php';
               <span class="text-muted text-sm">—</span>
             <?php endif; ?>
           </td>
-          <td class="text-sm text-muted"><?= htmlspecialchars($p['certifications'] ?: '—') ?></td>
+
           <td><?= $p['is_featured'] ? '<span class="badge badge-featured">★ Featured</span>' : '<span class="text-muted text-sm">—</span>' ?></td>
           <td>
             <form method="POST" action="products.php" style="display:inline">

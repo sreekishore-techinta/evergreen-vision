@@ -4,6 +4,24 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Reveal, productsImage } from "@/components/site";
 
+// ── Bundled product images (Vite resolves these to hashed URLs) ─
+import imgCarryBags    from "@/assets/compostable-bags-blank.jpg";
+import imgWasteBags   from "@/assets/compostable-waste-bags.jpg";
+import imgProduce     from "@/assets/breathable-produce-pouches.jpg";
+import imgGranules    from "@/assets/biopolymer-granules.jpg";
+import imgLifestyle   from "@/assets/eco-lifestyle-bag.jpg";
+import imgCollection  from "@/assets/product-collection.jpg";
+
+/** Maps the filename stored in DB image_url → Vite-bundled asset URL */
+const ASSET_MAP: Record<string, string> = {
+  "compostable-bags-blank.jpg":    imgCarryBags,
+  "compostable-waste-bags.jpg":    imgWasteBags,
+  "breathable-produce-pouches.jpg": imgProduce,
+  "biopolymer-granules.jpg":       imgGranules,
+  "eco-lifestyle-bag.jpg":         imgLifestyle,
+  "product-collection.jpg":        imgCollection,
+};
+
 export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
@@ -18,17 +36,31 @@ export const Route = createFileRoute("/products")({
   component: Products,
 });
 
-// ── API base — auto-detects project subfolder ─────────────────
-const API_BASE =
-  typeof window !== "undefined"
-    ? (() => {
-        const parts = window.location.pathname.split("/").filter(Boolean);
-        // If running under /evergreen-vision, include it; otherwise root
-        const idx = parts.indexOf("evergreen-vision");
-        const root = idx >= 0 ? `/evergreen-vision` : "";
-        return `${window.location.origin}${root}/backend/api`;
-      })()
-    : "/backend/api";
+// ── API base ───────────────────────────────────────────────────
+// In dev: Vite proxies /backend → http://localhost/evergreen-vision/backend (see vite.config.ts)
+// In prod (XAMPP static build): Apache serves everything from the same origin, so /backend/api
+//   resolves correctly relative to the domain root. For subfolder installs on shared hosting
+//   use the smarter detection below which strips known client-side route segments.
+function resolveApiBase(): string {
+  if (typeof window === "undefined") return "/backend/api";
+
+  // In production, strip any known client-side route from the path to find the site root.
+  // e.g. http://localhost/evergreen-vision/products → root = /evergreen-vision
+  const knownRoutes = [
+    "/products", "/about", "/contact", "/sustainability",
+    "/segment", "/admin", "/applications", "/certificate",
+    "/why-evergreen",
+  ];
+  let base = window.location.pathname;
+  for (const seg of knownRoutes) {
+    const idx = base.indexOf(seg);
+    if (idx !== -1) { base = base.slice(0, idx); break; }
+  }
+  base = base.replace(/\/$/, ""); // strip trailing slash
+  return `${window.location.origin}${base}/backend/api`;
+}
+
+const API_BASE = resolveApiBase();
 
 interface Product {
   id: number;
@@ -59,13 +91,19 @@ const PLACEHOLDER =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect width='800' height='500' fill='%23d6f0d8'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='32' fill='%23355a3f' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
 
 function getImgSrc(p: Product, apiBase: string): string {
+  // 1. Uploaded file (admin-uploaded image stored in /uploads/products/)
   if (p.image_path) {
-    // image_path is like /uploads/products/xxx.jpg  — make it absolute
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const parts  = apiBase.split("/backend/api")[0];
-    return parts + p.image_path;
+    const siteRoot = apiBase.split("/backend/api")[0];
+    return siteRoot + p.image_path;
   }
-  if (p.image_url) return p.image_url;
+  // 2. DB image_url is a known asset filename → resolve via Vite bundle map
+  if (p.image_url && ASSET_MAP[p.image_url]) {
+    return ASSET_MAP[p.image_url];
+  }
+  // 3. DB image_url is an absolute URL or external link
+  if (p.image_url && (p.image_url.startsWith("http") || p.image_url.startsWith("/"))) {
+    return p.image_url;
+  }
   return PLACEHOLDER;
 }
 
