@@ -2,17 +2,19 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import {
   ArrowRight,
+  ChevronDown,
   Facebook,
   Instagram,
   Linkedin,
   Mail,
   MapPin,
   Menu,
+  Package,
   Phone,
   X,
   Youtube,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/evergreen-hero.jpg";
 import productsImage from "@/assets/product-collection.jpg";
@@ -33,6 +35,323 @@ const nav = [
   ["/segment", "Why Us"],
   ["/contact", "Contact"],
 ] as const;
+
+/* ─── API base resolver (same logic as products.tsx) ───────────────────── */
+function resolveApiBase(): string {
+  if (typeof window === "undefined") return "/backend/api";
+  const knownRoutes = ["/products","/about","/contact","/sustainability","/segment","/admin","/applications","/certificate","/why-evergreen"];
+  let base = window.location.pathname;
+  for (const seg of knownRoutes) {
+    const idx = base.indexOf(seg);
+    if (idx !== -1) { base = base.slice(0, idx); break; }
+  }
+  return `${window.location.origin}${base.replace(/\/$/, "")}/backend/api`;
+}
+
+/* ─── Bundled fallback images ───────────────────────────────────────────── */
+import imgCarryBags  from "@/assets/compostable-bags-blank.jpg";
+import imgWasteBags  from "@/assets/compostable-waste-bags.jpg";
+import imgProduce    from "@/assets/breathable-produce-pouches.jpg";
+import imgGranules   from "@/assets/biopolymer-granules.jpg";
+import imgLifestyle  from "@/assets/eco-lifestyle-bag.jpg";
+import imgCollection from "@/assets/product-collection.jpg";
+import imgShopping   from "@/assets/product-shopping-bag.jpg";
+
+const ASSET_MAP: Record<string, string> = {
+  "compostable-bags-blank.jpg":     imgCarryBags,
+  "compostable-waste-bags.jpg":     imgWasteBags,
+  "breathable-produce-pouches.jpg": imgProduce,
+  "biopolymer-granules.jpg":        imgGranules,
+  "eco-lifestyle-bag.jpg":          imgLifestyle,
+  "product-collection.jpg":         imgCollection,
+  "product-shopping-bag.jpg":       imgShopping,
+};
+
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23d6f0d8'/%3E%3C/svg%3E";
+
+interface DropProduct  { id: number; name: string; slug: string; category: string; description: string; image_path: string; image_url: string; }
+interface DropCategory { id: number; name: string; slug: string; product_count: number; }
+
+function getDropImgSrc(p: DropProduct, apiBase: string): string {
+  if (p.image_path) return apiBase.split("/backend/api")[0] + p.image_path;
+  if (p.image_url && ASSET_MAP[p.image_url]) return ASSET_MAP[p.image_url]!;
+  if (p.image_url && (p.image_url.startsWith("http") || p.image_url.startsWith("/"))) return p.image_url;
+  return PLACEHOLDER;
+}
+
+/* ─── Products Mega-Dropdown ────────────────────────────────────────────── */
+function ProductsDropdown({ onClose }: { onClose?: () => void }) {
+  const [categories, setCategories] = useState<DropCategory[]>([]);
+  const [products,   setProducts]   = useState<DropProduct[]>([]);
+  const [activeTab,  setActiveTab]  = useState<string>("__all__");
+  const [open,       setOpen]       = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const apiBase = resolveApiBase();
+
+  useEffect(() => {
+    if (!open || products.length > 0) return;
+    setLoading(true);
+    Promise.all([
+      fetch(`${apiBase}/products.php?action=list`).then(r => r.json()).catch(() => ({ data: [] })),
+      fetch(`${apiBase}/categories.php?action=list`).then(r => r.json()).catch(() => ({ data: [] })),
+    ]).then(([pRes, cRes]) => {
+      const prods = Array.isArray(pRes?.data) ? pRes.data : Array.isArray(pRes) ? pRes : [];
+      const cats  = Array.isArray(cRes?.data) ? cRes.data : Array.isArray(cRes) ? cRes : [];
+      setProducts(prods);
+      setCategories(cats);
+    }).finally(() => setLoading(false));
+  }, [open]);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Category colour map for sidebar accents
+  const catColors: Record<string, string> = {
+    "Carry Bags":        "from-emerald-500 to-green-600",
+    "Waste Bags":        "from-teal-500 to-emerald-600",
+    "Produce Packaging": "from-lime-500 to-green-500",
+    "Raw Materials":     "from-green-600 to-emerald-700",
+    "Lifestyle":         "from-emerald-400 to-teal-500",
+  };
+
+  const displayed = activeTab === "__all__"
+    ? products.slice(0, 5)
+    : products.filter(p =>
+        p.category === activeTab ||
+        String(p.category) === activeTab ||
+        categories.find(c => String(c.id) === activeTab)?.name === p.category
+      ).slice(0, 5);
+
+  const activeLabel = activeTab === "__all__"
+    ? "All Products"
+    : categories.find(c => String(c.id) === activeTab)?.name ?? "";
+
+  return (
+    <div ref={ref} className="relative">
+      {/* ── Trigger ── */}
+      <button
+        onMouseEnter={() => setOpen(true)}
+        onClick={() => setOpen(v => !v)}
+        className={`flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium transition-all duration-200
+          ${open ? "text-[#1e5c2e] font-semibold" : "text-[#3a5c42] hover:text-[#1e5c2e]"}`}
+      >
+        Products
+        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown className="size-3.5" />
+        </motion.span>
+      </button>
+
+      {/* ── Mega panel ── */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            onMouseLeave={() => setOpen(false)}
+            className="absolute left-1/2 top-full z-50 mt-4 w-[920px] -translate-x-1/2 overflow-hidden rounded-3xl shadow-[0_32px_80px_rgba(10,25,15,0.28)]"
+            style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <div className="flex h-full">
+
+              {/* ──────────────── LEFT: dark sidebar ──────────────── */}
+              <div className="w-[220px] shrink-0 bg-gradient-to-b from-[#0d2617] to-[#0a1f10] flex flex-col">
+
+                {/* Sidebar header */}
+                <div className="px-5 pt-5 pb-4 border-b border-white/[0.07]">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400/70">Browse by</p>
+                  <p className="text-[15px] font-extrabold text-white mt-0.5">Categories</p>
+                </div>
+
+                {/* Category list */}
+                <div className="flex-1 py-3 overflow-y-auto">
+                  {/* All Products */}
+                  <button
+                    onClick={() => setActiveTab("__all__")}
+                    className={`group relative flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-200
+                      ${activeTab === "__all__"
+                        ? "bg-white/10 text-white"
+                        : "text-white/60 hover:bg-white/[0.06] hover:text-white/90"}`}
+                  >
+                    {activeTab === "__all__" && (
+                      <motion.span
+                        layoutId="cat-indicator"
+                        className="absolute left-0 top-1/2 h-8 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-400"
+                      />
+                    )}
+                    <div className={`grid size-8 shrink-0 place-items-center rounded-xl transition-all
+                      ${activeTab === "__all__"
+                        ? "bg-gradient-to-br from-emerald-400 to-green-500 shadow-[0_0_12px_rgba(52,211,153,0.4)]"
+                        : "bg-white/[0.08] group-hover:bg-white/[0.14]"}`}>
+                      <Package className="size-3.5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[12.5px] font-semibold leading-tight">All Products</p>
+                      <p className="text-[10px] text-white/40 mt-0.5">{products.length} items</p>
+                    </div>
+                  </button>
+
+                  {categories.map(cat => {
+                    const isActive = activeTab === String(cat.id);
+                    const grad = catColors[cat.name] ?? "from-emerald-500 to-green-600";
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveTab(String(cat.id))}
+                        className={`group relative flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-200
+                          ${isActive
+                            ? "bg-white/10 text-white"
+                            : "text-white/60 hover:bg-white/[0.06] hover:text-white/90"}`}
+                      >
+                        {isActive && (
+                          <motion.span
+                            layoutId="cat-indicator"
+                            className="absolute left-0 top-1/2 h-8 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-400"
+                          />
+                        )}
+                        <div className={`grid size-8 shrink-0 place-items-center rounded-xl transition-all
+                          ${isActive
+                            ? `bg-gradient-to-br ${grad} shadow-[0_0_14px_rgba(52,211,153,0.35)]`
+                            : "bg-white/[0.08] group-hover:bg-white/[0.14]"}`}>
+                          <span className="text-[11px] font-extrabold text-white">
+                            {cat.name.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-[12.5px] font-semibold leading-tight">{cat.name}</p>
+                          <p className="text-[10px] text-white/40 mt-0.5">
+                            {cat.product_count} product{cat.product_count !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Sidebar footer CTA */}
+                <div className="p-4 border-t border-white/[0.07]">
+                  <Link
+                    to="/contact"
+                    onClick={() => setOpen(false)}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-[12px] font-bold text-white shadow-[0_4px_16px_rgba(52,211,153,0.3)] transition hover:bg-emerald-400"
+                  >
+                    Get a Quote <ArrowRight className="size-3.5" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* ──────────────── RIGHT: product area ──────────────── */}
+              <div className="flex-1 bg-white">
+
+                {/* Top bar */}
+                <div className="flex items-center justify-between border-b border-[#f0f7f0] px-6 py-3.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#5a7060]">Showing</span>
+                    <span className="rounded-full bg-[#e8f5e9] px-2.5 py-0.5 text-[11px] font-bold text-[#1e5c2e]">
+                      {activeLabel}
+                    </span>
+                  </div>
+                  <Link
+                    to="/products"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-1 text-[12px] font-semibold text-[#1e5c2e] hover:text-[#174d26] transition-colors"
+                  >
+                    View all products <ArrowRight className="size-3" />
+                  </Link>
+                </div>
+
+                {/* Product grid */}
+                <div className="p-5">
+                  {loading ? (
+                    <div className="flex h-52 items-center justify-center gap-3">
+                      <div className="size-6 animate-spin rounded-full border-2 border-[#1e5c2e] border-t-transparent" />
+                      <span className="text-sm text-[#5a7060]">Loading products…</span>
+                    </div>
+                  ) : displayed.length === 0 ? (
+                    <div className="flex h-52 flex-col items-center justify-center gap-3 text-[#b0c8b4]">
+                      <Package className="size-10 opacity-30" />
+                      <p className="text-sm font-medium">No products in this category yet</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-5 gap-3.5">
+                      {displayed.map((p, i) => (
+                        <motion.div
+                          key={p.id}
+                          initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.22, delay: i * 0.05 }}
+                        >
+                          <Link
+                            to="/products"
+                            onClick={() => setOpen(false)}
+                            className="group flex flex-col overflow-hidden rounded-2xl border border-[#e8f0e8] bg-[#f8fdf9] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_12px_36px_rgba(15,39,24,0.16)] hover:border-transparent"
+                          >
+                            {/* Image */}
+                            <div className="relative aspect-[4/3] overflow-hidden bg-[#edf7ee]">
+                              <img
+                                src={getDropImgSrc(p, apiBase)}
+                                alt={p.name}
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                              {/* Dark gradient on hover */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#0d1f0f]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                              {/* Category tag */}
+                              <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <span className="rounded-full bg-emerald-500/90 px-2 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+                                  {p.category}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Card body */}
+                            <div className="p-3">
+                              <p className="line-clamp-2 text-[11.5px] font-bold leading-snug text-[#0d1f0f] group-hover:text-[#1e5c2e] transition-colors duration-200">
+                                {p.name}
+                              </p>
+                              <p className="mt-1 line-clamp-1 text-[10px] leading-relaxed text-[#6b9070]">
+                                {p.description?.split(".")[0] ?? p.category}
+                              </p>
+                              <div className="mt-2 flex items-center gap-0.5 text-[10.5px] font-bold text-[#1e5c2e] opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
+                                Explore <ArrowRight className="size-3" />
+                              </div>
+                            </div>
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom strip */}
+                <div className="mx-5 mb-5 flex items-center justify-between rounded-2xl border border-[#e0f0e3] bg-gradient-to-r from-[#f0faf2] to-[#e8f7ec] px-5 py-3">
+                  <div>
+                    <p className="text-[12.5px] font-bold text-[#0d1f0f]">Can't find what you need?</p>
+                    <p className="text-[11px] text-[#5a7060]">We offer custom sizes, prints & formulations.</p>
+                  </div>
+                  <Link
+                    to="/contact"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#1e5c2e] px-4 py-2 text-[11.5px] font-bold text-white shadow-sm transition hover:bg-[#174d26] hover:shadow-md"
+                  >
+                    Request Custom <ArrowRight className="size-3" />
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 /* ─── SITE HEADER — full-width flat navbar ─────────────────────────────── */
 export function SiteHeader() {
@@ -123,17 +442,34 @@ export function SiteHeader() {
               className="overflow-hidden bg-white border-b border-[#d8e8d8] shadow-lg"
             >
               <div className="flex flex-col px-4 py-3 gap-0.5">
-                {nav.map(([to, label]) => (
-                  <Link
-                    key={`${to}-${label}`}
-                    to={to}
-                    onClick={() => setOpen(false)}
-                    className="rounded-lg px-4 py-3 text-sm font-medium text-[#1a3d22] transition hover:bg-[#f0f7f0]"
-                    activeProps={{ className: "rounded-lg px-4 py-3 text-sm font-semibold text-[#1e5c2e] bg-[#f0f7f0]" }}
-                  >
-                    {label}
-                  </Link>
-                ))}
+                {nav.map(([to, label]) => {
+                  if (label === "Products") {
+                    return (
+                      <div key="mobile-products">
+                        <Link
+                          to="/products"
+                          onClick={() => setOpen(false)}
+                          className="rounded-lg px-4 py-3 text-sm font-medium text-[#1a3d22] transition hover:bg-[#f0f7f0] flex items-center justify-between"
+                          activeProps={{ className: "rounded-lg px-4 py-3 text-sm font-semibold text-[#1e5c2e] bg-[#f0f7f0] flex items-center justify-between" }}
+                        >
+                          Products
+                          <ArrowRight className="size-3.5 text-[#1e5c2e]" />
+                        </Link>
+                      </div>
+                    );
+                  }
+                  return (
+                    <Link
+                      key={`${to}-${label}`}
+                      to={to}
+                      onClick={() => setOpen(false)}
+                      className="rounded-lg px-4 py-3 text-sm font-medium text-[#1a3d22] transition hover:bg-[#f0f7f0]"
+                      activeProps={{ className: "rounded-lg px-4 py-3 text-sm font-semibold text-[#1e5c2e] bg-[#f0f7f0]" }}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
                 <Link
                   to="/contact"
                   onClick={() => setOpen(false)}
@@ -153,18 +489,23 @@ export function SiteHeader() {
 function NavLinks() {
   return (
     <nav className="flex items-center gap-1">
-      {nav.map(([to, label]) => (
-        <Link
-          key={`${to}-${label}`}
-          to={to}
-          className="px-4 py-2 text-[13px] font-medium text-[#3a5c42] transition-all duration-200 hover:text-[#1e5c2e]"
-          activeProps={{
-            className: "px-4 py-2 text-[13px] font-semibold text-[#1e5c2e] border-b-2 border-[#1e5c2e]",
-          }}
-        >
-          {label}
-        </Link>
-      ))}
+      {nav.map(([to, label]) => {
+        if (label === "Products") {
+          return <ProductsDropdown key="products-dropdown" />;
+        }
+        return (
+          <Link
+            key={`${to}-${label}`}
+            to={to}
+            className="px-4 py-2 text-[13px] font-medium text-[#3a5c42] transition-all duration-200 hover:text-[#1e5c2e]"
+            activeProps={{
+              className: "px-4 py-2 text-[13px] font-semibold text-[#1e5c2e] border-b-2 border-[#1e5c2e]",
+            }}
+          >
+            {label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
@@ -347,11 +688,11 @@ export function Reveal({
 export function Eyebrow({ children, light = false }: { children: ReactNode; light?: boolean }) {
   return (
     <p
-      className={`mb-3 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] ${
-        light ? "text-[#7ab87a]" : "text-[#2e7d42]"
+      className={`mb-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] ${
+        light ? "text-emerald-300" : "text-[#1e5c2e]"
       }`}
     >
-      <span className={`inline-block h-2.5 w-2.5 rounded-full ${light ? "bg-[#7ab87a]" : "bg-[#2e7d42]"}`} />
+      <span className={`inline-block h-2 w-2 rounded-full ${light ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" : "bg-[#1e5c2e]"}`} />
       {children}
     </p>
   );

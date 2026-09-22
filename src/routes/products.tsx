@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, CheckCircle2, Leaf, ShieldCheck, Sparkles, Tag } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Leaf, ShieldCheck, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Reveal, productsImage } from "@/components/site";
@@ -98,7 +98,7 @@ function getImgSrc(p: Product, apiBase: string): string {
   }
   // 2. DB image_url is a known asset filename → resolve via Vite bundle map
   if (p.image_url && ASSET_MAP[p.image_url]) {
-    return ASSET_MAP[p.image_url];
+    return ASSET_MAP[p.image_url]!;
   }
   // 3. DB image_url is an absolute URL or external link
   if (p.image_url && (p.image_url.startsWith("http") || p.image_url.startsWith("/"))) {
@@ -137,13 +137,13 @@ function Products() {
   return (
     <div className="bg-[#eef4ee] min-h-screen">
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 px-6 sm:px-10 lg:px-16 border-b border-[#c8dac8]/60 overflow-hidden">
+      <section className="relative pt-24 pb-10 lg:pt-28 lg:pb-14 px-6 sm:px-10 lg:px-16 border-b border-[#c8dac8]/60 overflow-hidden">
         <div className="absolute -top-24 right-0 w-[500px] h-[500px] rounded-full bg-[#7da482]/15 blur-3xl pointer-events-none" />
         <div className="relative mx-auto max-w-[1450px]">
-          <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
 
             {/* Left */}
-            <div className="lg:col-span-6 space-y-6">
+            <div className="lg:col-span-6 space-y-4">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#b8d4b8] text-[11px] font-mono uppercase tracking-[0.22em] text-[#24452e] shadow-sm">
                 <span className="size-2 rounded-full bg-[#4a7354] animate-pulse" />
                 <span>Certified Bio-Packaging Collection</span>
@@ -201,12 +201,12 @@ function Products() {
       </section>
 
       {/* ── CATALOG ────────────────────────────────────────────── */}
-      <section className="px-6 sm:px-10 lg:px-16 py-24 lg:py-32">
-        <div className="mx-auto max-w-[1450px] space-y-12">
+      <section className="px-6 sm:px-10 lg:px-16 py-10 lg:py-14">
+        <div className="mx-auto max-w-[1450px] space-y-7">
 
           {/* Section header */}
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="space-y-1.5">
               <span className="text-xs uppercase tracking-[0.25em] font-bold text-[#355a3f]">Packaging Series</span>
               <h2 className="font-display text-3xl sm:text-5xl text-[#0e2617]">Engineered for everyday utility.</h2>
             </div>
@@ -280,83 +280,87 @@ function Products() {
 
           {/* Product grid */}
           {!loading && !error && filtered.length > 0 && (
-            <div className="grid max-w-[1450px] gap-7 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
               {filtered.map((product, i) => (
                 <Reveal
                   key={product.id}
-                  delay={(i % 2) * 0.08}
-                  className="group overflow-hidden rounded-[2rem] bg-white border border-[#c8dac8]/80 shadow-[0_4px_20px_rgba(20,50,25,0.06)] hover:shadow-[0_20px_45px_-10px_rgba(20,50,25,0.18)] hover:border-[#7da482] transition-all duration-500 flex flex-col justify-between"
+                  delay={(i % 3) * 0.07}
+                  className="h-full"
                 >
-                  {/* Image */}
-                  <div className="aspect-[16/10] overflow-hidden bg-[#e5f0e5] relative">
-                    <img
-                      src={getImgSrc(product, API_BASE)}
-                      loading="lazy"
-                      alt={product.name}
-                      className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                      onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
-                    />
-                    {/* Featured badge */}
-                    {!!product.is_featured && (
-                      <span className="absolute top-4 left-4 bg-[#0e2617] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                        Featured
-                      </span>
-                    )}
-                    {/* Category pill */}
-                    {product.category && (
-                      <span className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-[#355a3f] text-[10px] font-mono uppercase tracking-wider px-3 py-1 rounded-full border border-[#c8dac8] flex items-center gap-1">
-                        <Tag className="size-2.5" />{product.category}
-                      </span>
-                    )}
-                  </div>
+                  <Link
+                    to="/contact"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white border border-[#dceedd] shadow-[0_2px_12px_rgba(15,40,20,0.07)] hover:shadow-[0_16px_44px_rgba(15,40,20,0.14)] hover:border-[#8dc89a] transition-all duration-300 hover:-translate-y-1"
+                  >
+                    {/* ── Image — fixed height so all cards align ── */}
+                    <div className="relative h-[220px] w-full shrink-0 overflow-hidden bg-[#e8f5ea]">
+                      <img
+                        src={getImgSrc(product, API_BASE)}
+                        loading="lazy"
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER; }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  {/* Content */}
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 p-7 sm:p-9 items-start">
-                    <div className="min-w-0 space-y-2">
-                      <h3 className="font-display text-2xl sm:text-3xl text-[#0e2617]">{product.name}</h3>
-
-                      {product.applications && (
-                        <p className="text-xs font-mono uppercase tracking-wider text-[#355a3f]">
-                          Application · {product.applications.split("\n")[0].replace(/^[•\-\s]+/, "")}
-                        </p>
+                      {!!product.is_featured && (
+                        <span className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-[#0e2617] px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-widest text-white shadow">
+                          <Sparkles className="size-2.5" /> Featured
+                        </span>
                       )}
-
-                      {product.description && (
-                        <p className="text-sm leading-relaxed text-[#526456] pt-2">{product.description}</p>
-                      )}
-
-                      {product.certifications && (
-                        <p className="text-xs text-[#4a7354] font-semibold pt-1 flex items-center gap-1">
-                          <ShieldCheck className="size-3.5" />
-                          {product.certifications}
-                        </p>
-                      )}
-
-                      {/* Feature bullets */}
-                      {product.features && (
-                        <ul className="pt-2 space-y-1">
-                          {product.features
-                            .split("\n")
-                            .filter(Boolean)
-                            .slice(0, 3)
-                            .map((f, fi) => (
-                              <li key={fi} className="text-xs text-[#526456] flex items-start gap-1.5">
-                                <CheckCircle2 className="size-3 mt-0.5 text-[#4a7354] shrink-0" />
-                                <span>{f.replace(/^[•\-\s]+/, "")}</span>
-                              </li>
-                            ))}
-                        </ul>
+                      {product.category && (
+                        <span className="absolute top-3 right-3 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-wider text-[#355a3f] border border-[#c8dac8]">
+                          {product.category}
+                        </span>
                       )}
                     </div>
 
-                    <Link
-                      to="/contact"
-                      className="grid size-12 shrink-0 place-items-center rounded-full bg-[#0e2617] text-[#fbf8f3] transition-all duration-300 group-hover:bg-[#7da482] group-hover:text-[#0e2617] group-hover:scale-105 shadow-md"
-                      aria-label={`Inquire about ${product.name}`}
-                    >
-                      <ArrowUpRight className="size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </Link>
-                  </div>
+                    {/* ── Body — flex-col fill, content locked to fixed zones ── */}
+                    <div className="flex flex-1 flex-col p-5">
+
+                      {/* Zone 1: Title — fixed 2 lines */}
+                      <h3 className="line-clamp-2 min-h-[2.5rem] text-[14.5px] font-bold leading-snug text-[#0e2617] group-hover:text-[#1e5c2e] transition-colors">
+                        {product.name}
+                      </h3>
+
+                      {/* Zone 2: Description — fixed 2 lines */}
+                      <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-[12px] leading-relaxed text-[#5a7060]">
+                        {product.description || "\u00A0"}
+                      </p>
+
+                      {/* Zone 3: Feature bullets — always 2 rows */}
+                      <ul className="mt-3 space-y-1.5 min-h-[3.2rem]">
+                        {product.features
+                          ? product.features.split("\n").filter(Boolean).slice(0, 2).map((f, fi) => (
+                              <li key={fi} className="flex items-center gap-2 text-[11.5px] text-[#3a5c42]">
+                                <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" />
+                                <span className="line-clamp-1">{f.replace(/^[•\-\s]+/, "")}</span>
+                              </li>
+                            ))
+                          : [0, 1].map(k => <li key={k} className="h-4" />)
+                        }
+                      </ul>
+
+                      {/* Spacer pushes footer to bottom */}
+                      <div className="flex-1" />
+
+                      {/* Zone 4: Footer — always same height */}
+                      <div className="mt-4 flex items-center justify-between border-t border-[#edf5ed] pt-3.5">
+                        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold text-[#4a7354] min-w-0">
+                          {product.certifications ? (
+                            <>
+                              <ShieldCheck className="size-3.5 shrink-0" />
+                              <span className="line-clamp-1">{product.certifications.split(",")[0].trim()}</span>
+                            </>
+                          ) : (
+                            <span className="opacity-0">—</span>
+                          )}
+                        </div>
+                        <span className="ml-3 grid size-8 shrink-0 place-items-center rounded-full bg-[#0e2617] text-white shadow-sm transition-all duration-300 group-hover:bg-emerald-600 group-hover:scale-110">
+                          <ArrowUpRight className="size-3.5" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
                 </Reveal>
               ))}
             </div>
@@ -364,7 +368,7 @@ function Products() {
 
           {/* CTA */}
           {!loading && filtered.length > 0 && (
-            <div className="flex justify-center pt-8">
+            <div className="flex justify-center pt-4">
               <Link
                 to="/contact"
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#0e2617] text-white text-sm font-semibold hover:bg-[#1a3d20] transition-colors shadow-lg"
