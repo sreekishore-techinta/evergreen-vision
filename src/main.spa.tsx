@@ -1,8 +1,10 @@
 /**
  * SPA entry point — used by vite.static.config.ts (npm run build:static).
  *
- * Bypasses TanStack Start's SSR shell (HeadContent / Scripts / shellComponent)
- * and mounts the router directly into #root, exactly like local dev.
+ * basepath is injected at build time via VITE_BASE_PATH env variable.
+ * For domain-root deploy:    VITE_BASE_PATH=/
+ * For subfolder deploy:      VITE_BASE_PATH=/evergreen-vision
+ * Default (not set):         / (domain root)
  */
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
@@ -13,8 +15,12 @@ import "./styles.css";
 
 const queryClient = new QueryClient();
 
+// Read base path injected at build time (defaults to "/" for domain-root deploy)
+const basepath = (import.meta.env.VITE_BASE_PATH as string | undefined) ?? "/";
+
 const router = createRouter({
   routeTree,
+  basepath,
   context: { queryClient },
   scrollRestoration: true,
   defaultPreloadStaleTime: 0,

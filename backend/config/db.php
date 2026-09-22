@@ -4,9 +4,9 @@
 // ============================================================
 define('DB_HOST',    'localhost');
 define('DB_PORT',    '3306');
-define('DB_NAME',    'ever_bio');
-define('DB_USER',    'root');
-define('DB_PASS',    '');
+define('DB_NAME',    'u910074219_evergreen_bio');
+define('DB_USER',    'u910074219_evergreen_bio');
+define('DB_PASS',    'Techinta@2026');
 define('DB_CHARSET', 'utf8mb4');
 
 /**

@@ -1,12 +1,7 @@
 /**
- * Static SPA build config.
- *
- * Generates a fully deployable static site into dist/
- *   npm run build:static
- *
- * - Pure client-side SPA (no SSR / Nitro / server)
- * - Works on Apache, Nginx, shared hosting, XAMPP
- * - All routes served via index.html (configure host for SPA fallback)
+ * Static SPA build config — npm run build:static → dist/
+ * base: "./" makes all asset paths relative so dist/ works at
+ * domain root OR any subfolder (e.g. yourdomain.com/evergreen-vision/)
  */
 import path from "path";
 import { defineConfig } from "vite";
@@ -16,12 +11,12 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 export default defineConfig({
+  base: "./",   // ← relative paths: works at root OR any subfolder
+
   plugins: [
-    // Must come BEFORE react() — generates routeTree.gen.ts
     TanStackRouterVite({
       routesDirectory: "./src/routes",
       generatedRouteTree: "./src/routeTree.gen.ts",
-      // SPA mode: no SSR
       autoCodeSplitting: true,
     }),
     react(),
@@ -29,10 +24,10 @@ export default defineConfig({
     tsconfigPaths(),
   ],
 
-  // Point at the SPA-specific entry (no SSR shell)
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    assetsDir: "assets",
     rollupOptions: {
       input: "index.html",
       output: {

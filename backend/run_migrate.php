@@ -1,40 +1,53 @@
 <?php
 // ============================================================
-// ONE-CLICK FULL MIGRATION — creates all tables, seeds data
-// URL: http://localhost/evergreen-vision/backend/run_migrate.php
-// DELETE after running.
+// ONE-CLICK FULL MIGRATION — creates all tables + seeds 25 products
+// URL: https://ghostwhite-hawk-667350.hostingersite.com/backend/run_migrate.php
+// DELETE this file immediately after running.
 // ============================================================
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require_once __DIR__ . '/config/db.php';
+// ── DB credentials (live server) ─────────────────────────────
+$DB_HOST    = 'localhost';
+$DB_NAME    = 'u910074219_evergreen_bio';
+$DB_USER    = 'u910074219_evergreen_bio';
+$DB_PASS    = 'Techinta@2026';
+$DB_CHARSET = 'utf8mb4';
 
 $done   = [];
 $errors = [];
 $pdo    = null;
 
-// ── Connect: first create DB if missing, then connect to it ──
+// ── Step 1: Connect to MySQL without specifying DB, create DB if needed ──
 try {
-    $dsn0 = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4';
-    $pdo0 = new PDO($dsn0, DB_USER, DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-    $pdo0->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-    $done[] = "✓ Database '" . DB_NAME . "' created / verified";
+    $dsn0 = "mysql:host={$DB_HOST};charset={$DB_CHARSET}";
+    $pdo0 = new PDO($dsn0, $DB_USER, $DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $pdo0->exec("CREATE DATABASE IF NOT EXISTS `{$DB_NAME}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    $done[] = "✓ Database '{$DB_NAME}' exists / created";
 } catch (PDOException $e) {
-    die(render("✗ Cannot connect to MySQL: " . $e->getMessage() . "<br><br>
-    <strong>Fix:</strong> Open XAMPP Control Panel → click <strong>Start</strong> next to MySQL, then refresh this page.",
-    [], ["✗ MySQL not running or wrong credentials"]));
+    die(render(
+        "✗ Cannot connect to MySQL: " . htmlspecialchars($e->getMessage()) .
+        "<br><br><strong>Fix:</strong> Verify credentials in this file match your Hostinger cPanel → Databases.",
+        [], ["✗ MySQL connection failed"]
+    ));
 }
 
+// ── Step 2: Connect to the database ─────────────────────────
 try {
-    $pdo = db();
-    $done[] = "✓ Connected to database: " . DB_NAME;
+    $dsn = "mysql:host={$DB_HOST};dbname={$DB_NAME};charset={$DB_CHARSET}";
+    $pdo = new PDO($dsn, $DB_USER, $DB_PASS, [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ]);
+    $done[] = "✓ Connected to '{$DB_NAME}'";
 } catch (PDOException $e) {
-    die(render("✗ DB select failed: " . $e->getMessage(), [], ["✗ DB connection failed"]));
+    die(render("✗ DB select failed: " . htmlspecialchars($e->getMessage()), [], ["✗ DB connection failed"]));
 }
 
 $pdo->exec("SET NAMES utf8mb4");
 
-// ── Create tables ─────────────────────────────────────────────
+// ── Step 3: Create all tables ─────────────────────────────────
 $tables = [
 
 "CREATE TABLE IF NOT EXISTS `admin_users` (
@@ -135,10 +148,10 @@ foreach ($tables as $sql) {
         $pdo->exec($sql);
         preg_match('/TABLE IF NOT EXISTS `(\w+)`/', $sql, $m);
         $done[] = "✓ Table ready: " . ($m[1] ?? '?');
-    } catch (PDOException $e) { $errors[] = "✗ " . $e->getMessage(); }
+    } catch (PDOException $e) { $errors[] = "Table: " . $e->getMessage(); }
 }
 
-// ── Safe ALTER — add missing columns ─────────────────────────
+// Safe ALTER — add any missing columns
 foreach ([
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS category_id INT UNSIGNED NULL DEFAULT NULL",
     "ALTER TABLE products ADD COLUMN IF NOT EXISTS image_path VARCHAR(255) NOT NULL DEFAULT ''",
@@ -147,7 +160,7 @@ foreach ([
 }
 $done[] = "✓ Schema columns verified";
 
-// ── Seed admin user ───────────────────────────────────────────
+// ── Step 4: Seed admin user ──────────────────────────────────
 $hash = password_hash('Admin@1234', PASSWORD_BCRYPT, ['cost' => 12]);
 try {
     $pdo->prepare("INSERT IGNORE INTO admin_users (username, email, password_hash, full_name, role)
@@ -155,13 +168,13 @@ try {
     $done[] = "✓ Admin user ready  (admin / Admin@1234)";
 } catch (PDOException $e) { $errors[] = "Admin: " . $e->getMessage(); }
 
-// ── Seed site settings ────────────────────────────────────────
+// ── Step 5: Seed site settings ───────────────────────────────
 $settings = [
     ['company_name','EVERGREENINDUSTRY','Company Name','general',1],
     ['tagline','Sustainable Packaging Solutions','Tagline','general',2],
     ['contact_email','hello@evergreenindustry.com','Contact Email','contact',1],
     ['contact_phone','+91 00000 00000','Contact Phone','contact',2],
-    ['contact_address','India · Serving businesses globally','Address','contact',3],
+    ['contact_address','Coimbatore, Tamil Nadu, India','Address','contact',3],
     ['whatsapp_number','','WhatsApp Number','contact',4],
     ['meta_title','EVERGREENINDUSTRY | Sustainable Packaging','Meta Title','seo',1],
     ['meta_description','Biodegradable and compostable packaging solutions.','Meta Description','seo',2],
@@ -171,25 +184,25 @@ $ins = $pdo->prepare("INSERT IGNORE INTO site_settings (setting_key,setting_val,
 foreach ($settings as $s) { try { $ins->execute($s); } catch (PDOException) {} }
 $done[] = "✓ Site settings seeded";
 
-// ── Seed categories ───────────────────────────────────────────
+// ── Step 6: Seed categories ──────────────────────────────────
 $cats = [
     ['Carry Bags',        'carry-bags',         'Compostable carry bags for retail and daily use.', 1],
     ['Waste Bags',        'waste-bags',         'Heavy-duty compostable liners for waste management.', 2],
     ['Produce Packaging', 'produce-packaging',  'Breathable pouches that keep fresh produce at its best.', 3],
-    ['Raw Materials',     'raw-materials',       'Biopolymer granules and resins for eco-packaging manufacturers.', 4],
-    ['Lifestyle',         'lifestyle',           'Premium eco-lifestyle bags and accessories.', 5],
+    ['Raw Materials',     'raw-materials',      'Biopolymer granules and resins for eco-packaging manufacturers.', 4],
+    ['Lifestyle',         'lifestyle',          'Premium eco-lifestyle bags and accessories.', 5],
 ];
 $insc = $pdo->prepare("INSERT IGNORE INTO categories (name, slug, description, sort_order, is_active) VALUES (?,?,?,?,1)");
 foreach ($cats as $c) { try { $insc->execute($c); } catch (PDOException $e) { $errors[] = "Cat: ".$e->getMessage(); } }
 $done[] = "✓ Categories seeded (" . count($cats) . " categories)";
 
-// ── Category id map ───────────────────────────────────────────
+// Category id map
 $catMap = [];
 foreach ($pdo->query("SELECT id, name FROM categories")->fetchAll() as $r) {
     $catMap[$r['name']] = (int)$r['id'];
 }
 
-// ── Seed 25 products ──────────────────────────────────────────
+// ── Step 7: Seed 25 products ─────────────────────────────────
 $products = [
     // CARRY BAGS
     ['Compostable D-Cut Carry Bags','compostable-d-cut-carry-bags','Carry Bags','Certified compostable D-cut carry bags made from PBAT & corn starch. Ideal for grocery, retail, and daily shopping. Zero microplastics.','• EN 13432 & ASTM D6400 certified\n• Available in GSM 20–50\n• Custom print-ready surface\n• Decomposes in 180 days\n• Food-contact safe','• Grocery & supermarkets\n• Retail outlets\n• Pharmacies','compostable-bags-blank.jpg','EN 13432, ASTM D6400, CPCB',1,1],
@@ -206,21 +219,21 @@ $products = [
     // PRODUCE PACKAGING
     ['Micro-Perforated Breathable Pouches','micro-perforated-breathable-pouches','Produce Packaging','Laser micro-perforated compostable pouches that extend fresh fruit and vegetable shelf life by up to 40%.','• 200–400 micron laser perforations\n• Extends shelf life 35–40%\n• Reduces condensation moisture\n• Heat-sealable top','• Strawberries & berries\n• Cherry tomatoes\n• Fresh herbs','breathable-produce-pouches.jpg','EN 13432, ASTM D6400',1,11],
     ['Compostable Produce Net Bags','compostable-produce-net-bags','Produce Packaging','Open-weave compostable net bags for onions, garlic, citrus, and root vegetables.','• Open-weave PLA netting\n• 500 g – 5 kg capacity\n• Heat-crimped top closure\n• Natural off-white colour','• Onions & garlic\n• Citrus fruits\n• Potatoes & beets','breathable-produce-pouches.jpg','OK Compost HOME, EN 13432',0,12],
-    ['Modified Atmosphere Produce Bags','modified-atmosphere-produce-bags','Produce Packaging','Multi-layer MAP compostable pouches that dramatically slow respiration of cut produce and salad mixes.','• 3-layer PLA/barrier/PLA structure\n• Customisable O₂ transmission rate\n• Heat-seal & zip-lock variants\n• Gas-flush machine compatible','• Pre-cut salad packs\n• Sliced fruits\n• Ready-to-eat vegetables','breathable-produce-pouches.jpg','EN 13432, FSSC 22000',0,13],
+    ['Modified Atmosphere Produce Bags','modified-atmosphere-produce-bags','Produce Packaging','Multi-layer MAP compostable pouches that dramatically slow respiration of cut produce and salad mixes.','• 3-layer PLA/barrier/PLA structure\n• Customisable O2 transmission rate\n• Heat-seal & zip-lock variants\n• Gas-flush machine compatible','• Pre-cut salad packs\n• Sliced fruits\n• Ready-to-eat vegetables','breathable-produce-pouches.jpg','EN 13432, FSSC 22000',0,13],
     ['Compostable Flat Produce Pouches','compostable-flat-produce-pouches','Produce Packaging','Simple flat compostable pouches for leafy greens, herbs, and microgreens.','• Thin 18-micron PLA film\n• Full-surface print area\n• Perforated tear-notch\n• Retail hang-hole option','• Leafy greens\n• Microgreens\n• Fresh herbs retail','breathable-produce-pouches.jpg','EN 13432, ASTM D6400',0,14],
     ['Banana Ripening Compostable Sleeves','banana-ripening-compostable-sleeves','Produce Packaging','Specially engineered compostable sleeves that slow banana ripening in transit, reducing post-harvest loss.','• Controlled ethylene permeability\n• UV-stable outer layer\n• Fits standard banana bunch\n• Reduces browning in transit','• Banana exporters\n• Cold-chain logistics\n• Wholesale fruit markets','breathable-produce-pouches.jpg','EN 13432, Rainforest Alliance Compatible',0,15],
     // RAW MATERIALS
-    ['PBAT / PLA Biopolymer Granules','pbat-pla-biopolymer-granules','Raw Materials','Industrial-grade PBAT/PLA blended granules — the core material behind Evergreen\'s full product range.','• PBAT:PLA ratio 60:40 (standard) or custom\n• MFI 2–8 g/10 min\n• Processing temp 150–190°C\n• Blown film & cast film compatible','• Blown-film carry bags\n• Cast stretch film\n• Thermoformed trays','biopolymer-granules.jpg','EN 13432, ASTM D6400, REACH',1,16],
+    ['PBAT / PLA Biopolymer Granules','pbat-pla-biopolymer-granules','Raw Materials','Industrial-grade PBAT/PLA blended granules — the core material behind Evergreen\'s full product range.','• PBAT:PLA ratio 60:40 (standard) or custom\n• MFI 2–8 g/10 min\n• Processing temp 150–190C\n• Blown film & cast film compatible','• Blown-film carry bags\n• Cast stretch film\n• Thermoformed trays','biopolymer-granules.jpg','EN 13432, ASTM D6400, REACH',1,16],
     ['Thermoplastic Starch (TPS) Granules','thermoplastic-starch-tps-granules','Raw Materials','Corn and cassava starch-based thermoplastic granules for 100% bio-based compostable packaging.','• 70–80% renewable bio-content\n• Low carbon footprint vs PLA\n• Suitable for injection moulding\n• Compatible with PLA blending','• Loose-fill packaging\n• Single-use cutlery\n• Seedling pots','biopolymer-granules.jpg','EN 13432, DIN CERTCO, USDA BioPreferred',0,17],
-    ['PLA (Polylactic Acid) Pellets','pla-polylactic-acid-pellets','Raw Materials','High-clarity PLA pellets for transparent packaging films, rigid containers, and coatings.','• >99% optical clarity\n• Rigid film & extrusion grade\n• Heat resistance up to 55°C\n• Fast compostability in industrial facilities','• Clear clamshell containers\n• Window pouches\n• Cold beverage cups','biopolymer-granules.jpg','EN 13432, FDA GRAS',0,18],
+    ['PLA (Polylactic Acid) Pellets','pla-polylactic-acid-pellets','Raw Materials','High-clarity PLA pellets for transparent packaging films, rigid containers, and coatings.','• >99% optical clarity\n• Rigid film & extrusion grade\n• Heat resistance up to 55C\n• Fast compostability in industrial facilities','• Clear clamshell containers\n• Window pouches\n• Cold beverage cups','biopolymer-granules.jpg','EN 13432, FDA GRAS',0,18],
     ['Bio-Based Masterbatch Pigments','bio-based-masterbatch-pigments','Raw Materials','Concentrated pigment masterbatches for PBAT/PLA resins — vivid brand colours without losing compostability certification.','• 20–40% pigment loading\n• Compatible with EN 13432 films\n• Non-toxic, food-contact safe\n• Pantone colour matching','• Coloured carry bags\n• Branded waste liners\n• Retail packaging','biopolymer-granules.jpg','REACH, RoHS, EN 13432 Compatible',0,19],
-    ['Compostable Adhesive & Sealant Resin','compostable-adhesive-sealant-resin','Raw Materials','Hot-melt compostable adhesive resin for seaming and laminating multi-layer bio-packaging.','• 100% compostable formula\n• Sealing temp range 80–130°C\n• Strong peel resistance\n• Water-based and solvent-free','• Pouch heat-sealing\n• Lamination adhesive\n• Multi-layer film bonding','biopolymer-granules.jpg','EN 13432, ASTM D6400, FDA',0,20],
+    ['Compostable Adhesive & Sealant Resin','compostable-adhesive-sealant-resin','Raw Materials','Hot-melt compostable adhesive resin for seaming and laminating multi-layer bio-packaging.','• 100% compostable formula\n• Sealing temp range 80–130C\n• Strong peel resistance\n• Water-based and solvent-free','• Pouch heat-sealing\n• Lamination adhesive\n• Multi-layer film bonding','biopolymer-granules.jpg','EN 13432, ASTM D6400, FDA',0,20],
     // LIFESTYLE
     ['Eco Lifestyle Tote Bags','eco-lifestyle-tote-bags','Lifestyle','Premium reusable tote bags crafted from natural jute and compostable inner liner for everyday use.','• Natural jute outer\n• Compostable PLA inner lining\n• 15 kg carry capacity\n• Custom print & embroidery','• Grocery shopping\n• Farmers markets\n• Corporate gifting','eco-lifestyle-bag.jpg','GOTS (Jute), EN 13432 (Liner)',1,21],
     ['Compostable Shopping Bags — Premium','compostable-shopping-bags-premium','Lifestyle','High-end compostable shopping bags with rope handles and matte finish for luxury retail.','• Matte laminate finish\n• Twisted rope cotton handles\n• Rigid bottom insert\n• Spot UV print option','• Luxury boutiques\n• Jewellery stores\n• Premium cosmetics','product-shopping-bag.jpg','EN 13432, ISO 14001',1,22],
     ['Seed Paper Gift Wrap','seed-paper-gift-wrap','Lifestyle','Plantable seed-embedded paper for wrapping gifts. After unwrapping, plant it to grow wildflowers or herbs.','• Embedded wildflower/herb seeds\n• A3 & A4 sheet sizes\n• Water-colour pattern surface\n• FSC-certified paper base','• Corporate gifting\n• Retail gift wrapping\n• Wedding & event favours','eco-lifestyle-bag.jpg','FSC Certified, 100% Plastic-Free',0,23],
-    ['Bamboo & PLA Coffee Cups','bamboo-pla-coffee-cups','Lifestyle','Single-use compostable coffee cups made from bamboo fibre and PLA lining. Heat-stable to 90°C.','• 8 oz / 12 oz / 16 oz sizes\n• PLA leak-proof inner coating\n• Offset print, QR-code friendly\n• Compostable lid sold separately','• Cafes & coffee shops\n• Airport lounges\n• Corporate canteens','eco-lifestyle-bag.jpg','EN 13432, FDA Food Contact',0,24],
-    ['Compostable Cutlery Set','compostable-cutlery-set','Lifestyle','CPLA cutlery set — fork, knife, spoon — heat-stable to 85°C. Premium biodegradable alternative to plastic cutlery.','• Fork + Knife + Spoon set\n• CPLA heat-stable to 85°C\n• Compostable kraft wrap\n• White & natural wood-look finish','• Food delivery services\n• Catering & events\n• Airline meals','eco-lifestyle-bag.jpg','EN 13432, ASTM D6400, FDA',0,25],
+    ['Bamboo & PLA Coffee Cups','bamboo-pla-coffee-cups','Lifestyle','Single-use compostable coffee cups made from bamboo fibre and PLA lining. Heat-stable to 90C.','• 8 oz / 12 oz / 16 oz sizes\n• PLA leak-proof inner coating\n• Offset print, QR-code friendly\n• Compostable lid sold separately','• Cafes & coffee shops\n• Airport lounges\n• Corporate canteens','eco-lifestyle-bag.jpg','EN 13432, FDA Food Contact',0,24],
+    ['Compostable Cutlery Set','compostable-cutlery-set','Lifestyle','CPLA cutlery set — fork, knife, spoon — heat-stable to 85C. Premium biodegradable alternative to plastic cutlery.','• Fork + Knife + Spoon set\n• CPLA heat-stable to 85C\n• Compostable kraft wrap\n• White & natural wood-look finish','• Food delivery services\n• Catering & events\n• Airline meals','eco-lifestyle-bag.jpg','EN 13432, ASTM D6400, FDA',0,25],
 ];
 
 $ins = $pdo->prepare(
@@ -246,10 +259,10 @@ foreach ($products as [$name,$slug,$cat,$desc,$feats,$apps,$imgUrl,$certs,$featu
 }
 $done[] = "✓ Products: {$inserted} inserted, {$updated} updated";
 
-// Back-fill category_id
+// Back-fill category_id on any older rows
 try {
     $pdo->exec("UPDATE products p JOIN categories c ON c.name=p.category SET p.category_id=c.id WHERE p.category_id IS NULL");
-    $done[] = "✓ category_id back-filled";
+    $done[] = "✓ category_id back-filled on existing rows";
 } catch (PDOException $e) { $errors[] = "Back-fill: ".$e->getMessage(); }
 
 // Final counts
@@ -259,7 +272,7 @@ $done[] = "✓ Done — {$totalP} active products, {$totalC} categories in DB";
 
 echo render(null, $done, $errors, (int)$totalP, (int)$totalC);
 
-// ─────────────────────────────────────────────────────────────
+// ─── HTML renderer ────────────────────────────────────────────────────────
 function render(?string $errMsg, array $done = [], array $errors = [], int $totalP = 0, int $totalC = 0): string {
     ob_start(); ?>
 <!DOCTYPE html>
@@ -286,9 +299,7 @@ li.er{color:#dc2626}li.er::before{content:"✗ ";font-weight:700}
 .stat-l{font-size:.75rem;color:#4a7054;margin-top:2px}
 .warn{background:#fef9c3;border:1px solid #fde047;border-radius:12px;padding:18px;font-size:.85rem;line-height:1.8}
 code{background:#f3f4f6;padding:1px 5px;border-radius:4px;font-size:.8rem}
-.links{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-a.btn{background:#166534;color:#fff;text-decoration:none;padding:8px 18px;border-radius:50px;font-size:.83rem;font-weight:600}
-a.btn:hover{background:#14532d}
+a.btn{display:inline-block;background:#166534;color:#fff;text-decoration:none;padding:8px 20px;border-radius:50px;font-size:.83rem;font-weight:600;margin-top:14px}
 </style>
 </head>
 <body>
@@ -313,23 +324,20 @@ a.btn:hover{background:#14532d}
   <?php endif; ?>
 
   <div class="card">
-    <h2>Completed</h2>
+    <h2>Completed Steps</h2>
     <ul><?php foreach($done as $d): ?><li class="ok"><?= htmlspecialchars($d) ?></li><?php endforeach ?></ul>
   </div>
 
   <div class="warn">
-    <strong>⚠ Delete this file after running!</strong><br>
-    <code>backend/run_migrate.php</code> &nbsp;|&nbsp; <code>backend/diag.php</code> &nbsp;|&nbsp; <code>backend/seed_products.php</code><br><br>
-    Admin login: <a href="/evergreen-vision/admin/login.php"><strong>/admin/login.php</strong></a><br>
-    Username: <code>admin</code> &nbsp; Password: <code>Admin@1234</code>
+    <strong>⚠ Delete these files from your server immediately!</strong><br>
+    <code>backend/run_migrate.php</code> &nbsp;|&nbsp; <code>backend/live_diag.php</code><br><br>
+    Admin login: <a href="/admin/login.php"><strong>/admin/login.php</strong></a><br>
+    Username: <code>admin</code> &nbsp;&nbsp; Password: <code>Admin@1234</code>
   </div>
+
+  <a class="btn" href="/admin/login.php">Go to Admin Panel →</a>
 
   <?php endif; ?>
-
-  <div class="links">
-    <a class="btn" href="/evergreen-vision/admin/login.php">Admin Panel →</a>
-    <a class="btn" style="background:#0e7490" href="/evergreen-vision/backend/diag.php">Run Diag Again</a>
-  </div>
 </div>
 </body>
 </html>

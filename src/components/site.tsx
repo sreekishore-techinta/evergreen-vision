@@ -134,18 +134,31 @@ function ProductsDropdown({ onClose }: { onClose?: () => void }) {
 
   return (
     <div ref={ref} className="relative">
-      {/* ── Trigger ── */}
-      <button
+      {/* ── Trigger: "Products" link navigates, chevron toggles dropdown ── */}
+      <div
+        className="flex items-center"
         onMouseEnter={() => setOpen(true)}
-        onClick={() => setOpen(v => !v)}
-        className={`flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium transition-all duration-200
-          ${open ? "text-[#1e5c2e] font-semibold" : "text-[#3a5c42] hover:text-[#1e5c2e]"}`}
       >
-        Products
-        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <ChevronDown className="size-3.5" />
-        </motion.span>
-      </button>
+        <Link
+          to="/products"
+          className={`px-3.5 py-2 text-[13px] font-medium transition-colors duration-150
+            ${open ? "text-[#1e5c2e] font-semibold" : "text-[#3a5c42] hover:text-[#1e5c2e]"}`}
+          activeProps={{ className: "px-3.5 py-2 text-[13px] font-semibold text-[#1e5c2e]" }}
+          onClick={() => setOpen(false)}
+        >
+          Products
+        </Link>
+        <button
+          onClick={() => setOpen(v => !v)}
+          className={`-ml-1 flex items-center px-1 py-2 text-[13px] transition-colors duration-150
+            ${open ? "text-[#1e5c2e]" : "text-[#3a5c42] hover:text-[#1e5c2e]"}`}
+          aria-label="Open products menu"
+        >
+          <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+            <ChevronDown className="size-3.5" />
+          </motion.span>
+        </button>
+      </div>
 
       {/* ── Mega panel ── */}
       <AnimatePresence>
@@ -359,76 +372,62 @@ export function SiteHeader() {
   const { scrollY } = useScroll();
   const navBg = useTransform(
     scrollY,
-    [0, 60],
-    ["rgba(255,255,255,0.92)", "rgba(255,255,255,1)"]
+    [0, 80],
+    ["rgba(255,255,255,0.94)", "rgba(255,255,255,1)"]
   );
   const navShadow = useTransform(
     scrollY,
-    [0, 60],
+    [0, 80],
     [
-      "0 1px 0px rgba(30,70,40,0.08)",
-      "0 2px 20px rgba(30,70,40,0.10)",
+      "0 1px 0px rgba(20,60,30,0.07)",
+      "0 2px 24px rgba(20,60,30,0.10)",
     ]
   );
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
-      {/* Desktop — full-width flat bar */}
+      {/* Desktop */}
       <motion.div
         style={{ backgroundColor: navBg, boxShadow: navShadow }}
-        className="hidden lg:flex h-[76px] w-full items-center justify-between px-8 xl:px-16 backdrop-blur-md border-b border-[#e0ede0]"
+        className="hidden lg:flex h-[72px] w-full items-center justify-between px-8 xl:px-16 backdrop-blur-md border-b border-[#dde8dd]"
       >
-        {/* Logo — icon mark + brand name in HTML for clarity at small navbar height */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          {/* Show only the icon portion of the logo at a clear, large size */}
-          <img
-            src={logoImg}
-            alt="Evergreen Industries"
-            className="h-[52px] w-auto object-contain"
-            style={{ maxWidth: "52px" }}
-          />
-          <div className="leading-[1.15]">
-            <p className="text-[15px] font-extrabold tracking-[0.06em] text-[#0f2718]">EVERGREEN</p>
-            <p className="text-[11px] font-semibold tracking-[0.18em] text-[#2e7d42]">INDUSTRIES</p>
+          <img src={logoImg} alt="Evergreen Industries" className="h-[46px] w-auto object-contain" style={{ maxWidth: "46px" }} />
+          <div className="leading-[1.2]">
+            <p className="text-[14.5px] font-extrabold tracking-[0.07em] text-[#0a1c0e]">EVERGREEN</p>
+            <p className="text-[10.5px] font-semibold tracking-[0.2em] text-[#2e7d42]">INDUSTRIES</p>
           </div>
         </Link>
 
-        {/* Center nav */}
         <NavLinks />
 
-        {/* CTA */}
         <Link
           to="/contact"
-          className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#1e5c2e] px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#174d26] hover:shadow-lg hover:-translate-y-0.5"
+          className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#1e5c2e] px-6 py-2.5 text-[13px] font-semibold text-white transition-all duration-200 hover:bg-[#174d26] hover:shadow-[0_4px_16px_rgba(20,80,35,0.35)] hover:-translate-y-px"
         >
-          Get a Quote <ArrowRight className="size-4" />
+          Get a Quote <ArrowRight className="size-3.5" />
         </Link>
       </motion.div>
 
-      {/* Mobile — full-width flat bar */}
+      {/* Mobile */}
       <div className="lg:hidden">
         <motion.div
           style={{ backgroundColor: navBg, boxShadow: navShadow }}
-          className="flex h-16 w-full items-center justify-between px-4 backdrop-blur-md border-b border-[#e0ede0]"
+          className="flex h-[60px] w-full items-center justify-between px-4 backdrop-blur-md border-b border-[#dde8dd]"
         >
           <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setOpen(false)}>
-            <img
-              src={logoImg}
-              alt="Evergreen Industries"
-              className="h-[42px] w-auto object-contain"
-              style={{ maxWidth: "42px" }}
-            />
-            <div className="leading-[1.15]">
-              <p className="text-[13px] font-extrabold tracking-[0.06em] text-[#0f2718]">EVERGREEN</p>
-              <p className="text-[10px] font-semibold tracking-[0.16em] text-[#2e7d42]">INDUSTRIES</p>
+            <img src={logoImg} alt="Evergreen Industries" className="h-[38px] w-auto object-contain" style={{ maxWidth: "38px" }} />
+            <div className="leading-[1.2]">
+              <p className="text-[13px] font-extrabold tracking-[0.07em] text-[#0a1c0e]">EVERGREEN</p>
+              <p className="text-[9.5px] font-semibold tracking-[0.17em] text-[#2e7d42]">INDUSTRIES</p>
             </div>
           </Link>
           <button
-            className="grid size-9 place-items-center rounded-lg border border-[#d8e8d8] text-[#1a3d22] transition hover:bg-[#f0f7f0]"
+            className="grid size-9 place-items-center rounded-xl border border-[#d4e4d4] text-[#1a3d22] transition hover:bg-[#f0f7f0]"
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle navigation"
           >
-            {open ? <X className="size-5" /> : <Menu className="size-5" />}
+            {open ? <X className="size-4.5" /> : <Menu className="size-4.5" />}
           </button>
         </motion.div>
 
@@ -439,9 +438,9 @@ export function SiteHeader() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.22 }}
-              className="overflow-hidden bg-white border-b border-[#d8e8d8] shadow-lg"
+              className="overflow-hidden bg-white border-b border-[#d4e4d4] shadow-lg"
             >
-              <div className="flex flex-col px-4 py-3 gap-0.5">
+              <div className="flex flex-col gap-0.5 px-4 py-3">
                 {nav.map(([to, label]) => {
                   if (label === "Products") {
                     return (
@@ -449,8 +448,8 @@ export function SiteHeader() {
                         <Link
                           to="/products"
                           onClick={() => setOpen(false)}
-                          className="rounded-lg px-4 py-3 text-sm font-medium text-[#1a3d22] transition hover:bg-[#f0f7f0] flex items-center justify-between"
-                          activeProps={{ className: "rounded-lg px-4 py-3 text-sm font-semibold text-[#1e5c2e] bg-[#f0f7f0] flex items-center justify-between" }}
+                          className="flex items-center justify-between rounded-xl px-4 py-3 text-[13.5px] font-medium text-[#1a3d22] transition hover:bg-[#f0f7f0]"
+                          activeProps={{ className: "flex items-center justify-between rounded-xl px-4 py-3 text-[13.5px] font-semibold text-[#1e5c2e] bg-[#f0f7f0]" }}
                         >
                           Products
                           <ArrowRight className="size-3.5 text-[#1e5c2e]" />
@@ -463,8 +462,8 @@ export function SiteHeader() {
                       key={`${to}-${label}`}
                       to={to}
                       onClick={() => setOpen(false)}
-                      className="rounded-lg px-4 py-3 text-sm font-medium text-[#1a3d22] transition hover:bg-[#f0f7f0]"
-                      activeProps={{ className: "rounded-lg px-4 py-3 text-sm font-semibold text-[#1e5c2e] bg-[#f0f7f0]" }}
+                      className="rounded-xl px-4 py-3 text-[13.5px] font-medium text-[#1a3d22] transition hover:bg-[#f0f7f0]"
+                      activeProps={{ className: "rounded-xl px-4 py-3 text-[13.5px] font-semibold text-[#1e5c2e] bg-[#f0f7f0]" }}
                     >
                       {label}
                     </Link>
@@ -473,7 +472,7 @@ export function SiteHeader() {
                 <Link
                   to="/contact"
                   onClick={() => setOpen(false)}
-                  className="mt-2 rounded-full bg-[#1e5c2e] px-5 py-3 text-center text-sm font-semibold text-white"
+                  className="mt-2 rounded-full bg-[#1e5c2e] px-5 py-3 text-center text-[13.5px] font-semibold text-white transition hover:bg-[#174d26]"
                 >
                   Get a Quote
                 </Link>
@@ -488,7 +487,7 @@ export function SiteHeader() {
 
 function NavLinks() {
   return (
-    <nav className="flex items-center gap-1">
+    <nav className="flex items-center gap-0.5">
       {nav.map(([to, label]) => {
         if (label === "Products") {
           return <ProductsDropdown key="products-dropdown" />;
@@ -497,9 +496,9 @@ function NavLinks() {
           <Link
             key={`${to}-${label}`}
             to={to}
-            className="px-4 py-2 text-[13px] font-medium text-[#3a5c42] transition-all duration-200 hover:text-[#1e5c2e]"
+            className="relative px-3.5 py-2 text-[13px] font-medium text-[#3a5c42] transition-colors duration-150 hover:text-[#1e5c2e]"
             activeProps={{
-              className: "px-4 py-2 text-[13px] font-semibold text-[#1e5c2e] border-b-2 border-[#1e5c2e]",
+              className: "relative px-3.5 py-2 text-[13px] font-semibold text-[#1e5c2e] after:absolute after:bottom-0 after:left-3.5 after:right-3.5 after:h-[2px] after:rounded-full after:bg-[#1e5c2e]",
             }}
           >
             {label}
@@ -513,37 +512,30 @@ function NavLinks() {
 /* ─── SITE FOOTER — reference-style 4-col dark footer ──────────────────── */
 export function SiteFooter() {
   return (
-    <footer className="bg-[#0f2718] text-white">
-      {/* Main footer grid */}
-      <div className="mx-auto max-w-[1420px] px-6 pt-14 pb-10 lg:px-10">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1.2fr_1fr]">
+    <footer className="bg-[#0a1c0e] text-white">
+      <div className="mx-auto max-w-[1420px] px-6 pt-16 pb-10 lg:px-12">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.7fr_1fr_1.2fr_1fr]">
 
           {/* Col 1 — Brand */}
           <div>
-            <div className="mb-4">
-              {/* On dark footer: white-filter makes the green logo visible as white */}
-              <img
-                src={logoImg}
-                alt="Evergreen Industries"
-                className="h-14 w-auto object-contain brightness-0 invert"
-              />
+            <div className="mb-5">
+              <img src={logoImg} alt="Evergreen Industries" className="h-12 w-auto object-contain brightness-0 invert" />
             </div>
-            <p className="text-sm leading-7 text-white/55 max-w-[260px]">
+            <p className="text-[13px] leading-[1.8] text-white/50 max-w-[250px]">
               Sustainable packaging for a better tomorrow. Premium biodegradable &amp; compostable solutions for responsible businesses.
             </p>
-            {/* Social icons */}
-            <div className="mt-5 flex items-center gap-3">
+            <div className="mt-6 flex items-center gap-2.5">
               {[
-                { icon: Facebook, href: "#", label: "Facebook" },
+                { icon: Facebook,  href: "#", label: "Facebook" },
                 { icon: Instagram, href: "#", label: "Instagram" },
-                { icon: Linkedin, href: "#", label: "LinkedIn" },
-                { icon: Youtube, href: "#", label: "YouTube" },
+                { icon: Linkedin,  href: "#", label: "LinkedIn" },
+                { icon: Youtube,   href: "#", label: "YouTube" },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="grid size-8 place-items-center rounded-full border border-white/15 text-white/50 transition hover:border-[#4a9a5a] hover:text-[#4a9a5a]"
+                  className="grid size-8 place-items-center rounded-full border border-white/12 text-white/45 transition-all duration-200 hover:border-[#4a9a5a] hover:text-[#4a9a5a]"
                 >
                   <Icon className="size-3.5" />
                 </a>
@@ -553,49 +545,28 @@ export function SiteFooter() {
 
           {/* Col 2 — Quick Links */}
           <div>
-            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#7ab87a]">
-              Quick Links
-            </p>
-            <div className="flex flex-col gap-2.5">
-              {(
-              [
-                ["/", "Home"],
-                ["/about", "About Us"],
-                ["/products", "Products"],
-                ["/segment", "Solutions"],
-                ["/contact", "Contact"],
-              ] as const
-            ).map(([to, label]) => (
-              <Link
-                key={to + label}
-                to={to}
-                className="text-sm text-white/60 transition hover:text-white"
-              >
-                {label}
-              </Link>
-            ))}
+            <p className="mb-5 text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6ab87a]">Quick Links</p>
+            <div className="flex flex-col gap-3">
+              {([
+                ["/",             "Home"],
+                ["/about",        "About Us"],
+                ["/products",     "Products"],
+                ["/segment",      "Solutions"],
+                ["/contact",      "Contact"],
+              ] as const).map(([to, label]) => (
+                <Link key={to + label} to={to} className="text-[13px] text-white/55 transition-colors duration-150 hover:text-white">
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Col 3 — Our Products */}
           <div>
-            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#7ab87a]">
-              Our Products
-            </p>
-            <div className="flex flex-col gap-2.5">
-              {[
-                "Bio Carry Bags",
-                "Shopping Bags",
-                "T-Shirt Bags",
-                "Compostable Waste Bags",
-                "Produce & Breathable Pouches",
-                "Biopolymer Granules",
-              ].map((name) => (
-                <Link
-                  key={name}
-                  to="/products"
-                  className="text-sm text-white/60 transition hover:text-white"
-                >
+            <p className="mb-5 text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6ab87a]">Our Products</p>
+            <div className="flex flex-col gap-3">
+              {["Bio Carry Bags", "Shopping Bags", "T-Shirt Bags", "Compostable Waste Bags", "Produce & Breathable Pouches", "Biopolymer Granules"].map((name) => (
+                <Link key={name} to="/products" className="text-[13px] text-white/55 transition-colors duration-150 hover:text-white">
                   {name}
                 </Link>
               ))}
@@ -604,25 +575,17 @@ export function SiteFooter() {
 
           {/* Col 4 — Contact */}
           <div>
-            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#7ab87a]">
-              Contact Us
-            </p>
-            <div className="flex flex-col gap-3.5">
-              <a
-                href="tel:+919003062093"
-                className="flex items-start gap-2.5 text-sm text-white/60 transition hover:text-white"
-              >
+            <p className="mb-5 text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6ab87a]">Contact Us</p>
+            <div className="flex flex-col gap-4">
+              <a href="tel:+919003062093" className="flex items-start gap-2.5 text-[13px] text-white/55 transition-colors duration-150 hover:text-white">
                 <Phone className="mt-0.5 size-4 shrink-0 text-[#4a9a5a]" />
                 +91 90030 62093
               </a>
-              <a
-                href="mailto:info@evergreenindustry.com"
-                className="flex items-start gap-2.5 text-sm text-white/60 transition hover:text-white"
-              >
+              <a href="mailto:info@evergreenindustry.com" className="flex items-start gap-2.5 text-[13px] text-white/55 transition-colors duration-150 hover:text-white">
                 <Mail className="mt-0.5 size-4 shrink-0 text-[#4a9a5a]" />
                 info@evergreenindustry.com
               </a>
-              <div className="flex items-start gap-2.5 text-sm text-white/60">
+              <div className="flex items-start gap-2.5 text-[13px] text-white/55">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-[#4a9a5a]" />
                 Coimbatore, Tamil Nadu, India
               </div>
@@ -632,18 +595,12 @@ export function SiteFooter() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-[1420px] flex-wrap items-center justify-between gap-3 px-6 py-4 lg:px-10">
-          <p className="text-xs text-white/35">
-            © 2026 Evergreen Industry. All Rights Reserved.
-          </p>
-          <div className="flex items-center gap-5">
-            <a href="#" className="text-xs text-white/35 transition hover:text-white/70">
-              Privacy Policy
-            </a>
-            <a href="#" className="text-xs text-white/35 transition hover:text-white/70">
-              Terms &amp; Conditions
-            </a>
+      <div className="border-t border-white/[0.08]">
+        <div className="mx-auto flex max-w-[1420px] flex-wrap items-center justify-between gap-3 px-6 py-5 lg:px-12">
+          <p className="text-[12px] text-white/30">© 2026 Evergreen Industry. All Rights Reserved.</p>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-[12px] text-white/30 transition-colors hover:text-white/60">Privacy Policy</a>
+            <a href="#" className="text-[12px] text-white/30 transition-colors hover:text-white/60">Terms &amp; Conditions</a>
           </div>
         </div>
       </div>
