@@ -509,11 +509,73 @@ function NavLinks() {
   );
 }
 
+/* ─── Official Brand Contact & Location Banner Strip ───────────────────── */
+export function ContactBannerStrip({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-[#031d0d] via-[#093517] to-[#04200f] px-6 sm:px-8 py-5 sm:py-6 shadow-2xl ${className}`}
+    >
+      {/* Decorative ambient leaf-toned glows */}
+      <div className="pointer-events-none absolute -right-8 -bottom-8 h-44 w-44 rounded-full bg-emerald-400/20 blur-2xl" />
+      <div className="pointer-events-none absolute -left-8 -top-8 h-44 w-44 rounded-full bg-amber-400/15 blur-2xl" />
+
+      <div className="relative z-10 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 sm:gap-8">
+        {/* Left: Phone Section — Yellow circular badge + large number */}
+        <a
+          href="tel:+917339285437"
+          className="group flex items-center gap-4 transition-transform duration-200 hover:scale-[1.02]"
+        >
+          <div className="grid size-14 shrink-0 place-items-center rounded-full bg-[#fbb016] text-[#071f11] shadow-[0_0_24px_rgba(251,176,22,0.5)] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#f59e0b]">
+            <Phone className="size-7 fill-current" />
+          </div>
+          <div>
+            <div className="text-2xl sm:text-3xl font-black tracking-tight text-white transition-colors group-hover:text-[#fbb016]">
+              73392 85437
+            </div>
+            <p className="mt-0.5 text-xs sm:text-sm font-semibold tracking-wide text-emerald-300/90">
+              Call Now for More Details
+            </p>
+          </div>
+        </a>
+
+        {/* Center Divider on Desktop */}
+        <div className="hidden md:block h-14 w-[1px] bg-white/20" />
+
+        {/* Right: Address Section — White MapPin + Thanjavur Highlight */}
+        <a
+          href="https://maps.google.com/?q=SIDCO+Industrial+Estate,+N.K.+Road,+Thanjavur+613006"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-start gap-4 transition-transform duration-200 hover:scale-[1.01]"
+        >
+          <div className="mt-1 grid size-10 shrink-0 place-items-center rounded-full border border-white/25 bg-white/10 text-white shadow-sm transition-colors group-hover:border-emerald-400 group-hover:bg-emerald-500">
+            <MapPin className="size-5 text-white" />
+          </div>
+          <div className="text-xs sm:text-[13px] font-bold uppercase leading-snug tracking-wider text-white">
+            <p className="text-white/95">NO. 2, THOLILPETTAI,</p>
+            <p className="text-white/90">SIDCO INDUSTRIAL ESTATE, N.K. ROAD,</p>
+            <p className="mt-0.5 text-sm sm:text-[15px] font-black tracking-widest text-[#facc15]">
+              THANJAVUR (613006)
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+  );
+}
+
 /* ─── SITE FOOTER — reference-style 4-col dark footer ──────────────────── */
 export function SiteFooter() {
   return (
-    <footer className="bg-[#0a1c0e] text-white">
-      <div className="mx-auto max-w-[1420px] px-6 pt-16 pb-10 lg:px-12">
+    <footer className="mt-16 bg-[#0a1c0e] text-white">
+      {/* ── Official Contact & Location Banner Strip (matches user requirement) ── */}
+      <div className="px-6 pt-8 pb-0 lg:px-12">
+        <div className="mx-auto max-w-[1420px]">
+          <ContactBannerStrip />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1420px] px-6 pt-14 pb-10 lg:px-12">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.7fr_1fr_1.2fr_1fr]">
 
           {/* Col 1 — Brand */}
@@ -577,18 +639,38 @@ export function SiteFooter() {
           <div>
             <p className="mb-5 text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6ab87a]">Contact Us</p>
             <div className="flex flex-col gap-4">
-              <a href="tel:+919003062093" className="flex items-start gap-2.5 text-[13px] text-white/55 transition-colors duration-150 hover:text-white">
-                <Phone className="mt-0.5 size-4 shrink-0 text-[#4a9a5a]" />
-                +91 90030 62093
+              <a
+                href="tel:+917339285437"
+                className="group flex items-start gap-2.5 text-[13px] text-white/70 transition-colors duration-150 hover:text-white"
+              >
+                <div className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-[#fbb016] text-[#071f11]">
+                  <Phone className="size-3 fill-current" />
+                </div>
+                <div>
+                  <span className="block font-bold tracking-wide text-white">73392 85437</span>
+                  <span className="text-[11px] text-emerald-300/80">Call Now for More Details</span>
+                </div>
               </a>
-              <a href="mailto:info@evergreenindustry.com" className="flex items-start gap-2.5 text-[13px] text-white/55 transition-colors duration-150 hover:text-white">
+              <a
+                href="mailto:info@evergreenindustry.com"
+                className="flex items-start gap-2.5 text-[13px] text-white/55 transition-colors duration-150 hover:text-white"
+              >
                 <Mail className="mt-0.5 size-4 shrink-0 text-[#4a9a5a]" />
                 info@evergreenindustry.com
               </a>
-              <div className="flex items-start gap-2.5 text-[13px] text-white/55">
-                <MapPin className="mt-0.5 size-4 shrink-0 text-[#4a9a5a]" />
-                Coimbatore, Tamil Nadu, India
-              </div>
+              <a
+                href="https://maps.google.com/?q=SIDCO+Industrial+Estate,+N.K.+Road,+Thanjavur+613006"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-start gap-2.5 text-[13px] text-white/60 transition-colors hover:text-white"
+              >
+                <MapPin className="mt-0.5 size-4 shrink-0 text-[#4a9a5a] group-hover:text-emerald-400" />
+                <div className="leading-snug">
+                  <p>No. 2, Tholilpettai,</p>
+                  <p>SIDCO Industrial Estate, N.K. Road,</p>
+                  <p className="mt-0.5 font-semibold text-[#facc15]">Thanjavur (613006), Tamil Nadu</p>
+                </div>
+              </a>
             </div>
           </div>
         </div>
@@ -699,20 +781,19 @@ export function PageHero({
   image?: string;
 }) {
   return (
-    <section className="relative min-h-[72vh] overflow-hidden bg-[#0f2718] text-white">
+    <section className="relative min-h-screen overflow-hidden bg-[#0f2718] text-white">
       <img
         src={image}
         alt="Sustainable packaging by Evergreen Industry"
         width={1920}
         height={1280}
-        className="absolute inset-0 h-full w-full object-cover opacity-50 cinematic-zoom"
+        className="absolute inset-0 h-full w-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0f2718] via-[#0f2718]/70 to-transparent" />
-      <div className="relative mx-auto flex min-h-[72vh] max-w-[1420px] items-end px-6 pb-20 pt-40 lg:px-10 lg:pb-24">
+      <div className="relative mx-auto flex min-h-screen max-w-[1420px] items-end px-6 pb-20 pt-40 lg:px-10 lg:pb-24">
         <Reveal className="max-w-3xl">
           <Eyebrow light>{eyebrow}</Eyebrow>
           <h1 className="text-5xl leading-[1.05] sm:text-7xl lg:text-[5.5rem]">{title}</h1>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">{copy}</p>
+          <p className="mt-6 max-w-2xl text-base leading-7 text-white sm:text-lg">{copy}</p>
         </Reveal>
       </div>
     </section>

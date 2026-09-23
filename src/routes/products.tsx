@@ -349,7 +349,7 @@ function Products() {
                           {product.certifications ? (
                             <>
                               <ShieldCheck className="size-3.5 shrink-0" />
-                              <span className="line-clamp-1">{product.certifications.split(",")[0].trim()}</span>
+                              <span className="line-clamp-1">{product.certifications.split(",")[0]?.trim() ?? ""}</span>
                             </>
                           ) : (
                             <span className="opacity-0">—</span>

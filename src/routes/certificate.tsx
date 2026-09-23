@@ -123,7 +123,7 @@ const credentials = [
   },
   {
     label: "Registered Manufacturing Facility",
-    value: "Shed No. 2, SIDCO Industrial Estate, N.K. Road, Thanjavur - 613006, Tamil Nadu",
+    value: "No. 2, Tholilpettai, SIDCO Industrial Estate, N.K. Road, Thanjavur (613006), Tamil Nadu",
     icon: MapPin,
   },
   {

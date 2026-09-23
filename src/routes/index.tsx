@@ -19,7 +19,7 @@ import {
 import { Reveal, Eyebrow, ctaImage, logoImg } from "@/components/site";
 
 /* ── Asset imports ──────────────────────────────────────────────────────── */
-import heroHeroImg      from "@/assets/home hero sec.png";
+import heroHeroImg      from "@/assets/home.png";
 import imgCarryBags     from "@/assets/compostable-bags-blank.jpg";
 import imgWasteBags     from "@/assets/compostable-waste-bags.jpg";
 import imgProduce       from "@/assets/breathable-produce-pouches.jpg";
@@ -93,9 +93,6 @@ function Index() {
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
 
-          {/* Local gradient — only behind the text column, leaves right side clean */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/72 via-white/38 to-transparent pointer-events-none" />
-
           {/* Content column */}
           <div
             className="relative z-10 flex h-full flex-col justify-center px-6 py-14 sm:px-10 lg:px-16 xl:px-20"
@@ -106,7 +103,7 @@ function Index() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="mb-4 text-[10.5px] font-bold uppercase tracking-[0.28em] text-[#1e5c2e]"
+              className="mb-4 text-[10.5px] font-bold uppercase tracking-[0.28em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]"
             >
               Let's Reduce Plastic
             </motion.p>
@@ -116,10 +113,10 @@ function Index() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.1 }}
-              className="max-w-[12ch] text-[2.6rem] font-extrabold leading-[1.07] tracking-tight text-[#0a1c0e] sm:text-[3.2rem] lg:text-[4rem]"
+              className="max-w-[12ch] text-[2.6rem] font-extrabold leading-[1.07] tracking-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)] sm:text-[3.2rem] lg:text-[4rem]"
             >
               Sustainable<br />Packaging<br />
-              for a <span className="text-[#1e7a38]">Greener<br className="hidden sm:block" /> Tomorrow</span>
+              for a <span className="text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)]">Greener<br className="hidden sm:block" /> Tomorrow</span>
             </motion.h1>
 
             {/* Sub-copy */}
@@ -127,7 +124,7 @@ function Index() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.22 }}
-              className="mt-5 max-w-[38ch] text-[13.5px] leading-[1.75] text-[#1e3628] sm:text-sm"
+              className="mt-5 max-w-[38ch] text-[13.5px] leading-[1.75] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.8)] sm:text-sm"
             >
               High-quality biodegradable and compostable packaging<br className="hidden sm:block" />
               solutions for a cleaner, healthier planet.
@@ -150,15 +147,17 @@ function Index() {
               </Link>
 
               <a
-                href="https://wa.me/919876543210"
+                href="https://wa.me/917339285437"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-[#0d1f0f]/30 bg-white/70 px-7 py-3 text-[13.5px] font-bold text-[#0d1f0f] backdrop-blur-sm transition-all duration-200 hover:bg-white hover:-translate-y-px hover:border-[#1a7a35]"
+                className="group inline-flex items-center gap-2.5 rounded-full bg-[#25d366] px-7 py-3 text-[13.5px] font-bold text-white shadow-[0_4px_24px_rgba(37,211,102,0.5)] transition-all duration-200 hover:bg-[#20bc5a] hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(37,211,102,0.65)]"
               >
-                <svg viewBox="0 0 24 24" className="size-4 fill-[#25d366]" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.102 1.523 5.824L0 24l6.335-1.502A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.728.884.916-3.618-.236-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
-                </svg>
+                <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white/25 transition-transform duration-200 group-hover:scale-110">
+                  <svg viewBox="0 0 24 24" className="size-3 fill-white" aria-hidden="true">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.102 1.523 5.824L0 24l6.335-1.502A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.728.884.916-3.618-.236-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+                  </svg>
+                </span>
                 WhatsApp Now
               </a>
             </motion.div>

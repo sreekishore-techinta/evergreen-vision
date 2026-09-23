@@ -16,7 +16,7 @@ import "./styles.css";
 const queryClient = new QueryClient();
 
 // Read base path injected at build time (defaults to "/" for domain-root deploy)
-const basepath = (import.meta.env.VITE_BASE_PATH as string | undefined) ?? "/";
+const basepath = (import.meta.env["VITE_BASE_PATH"] as string | undefined) ?? "/";
 
 const router = createRouter({
   routeTree,

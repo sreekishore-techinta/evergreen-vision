@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowDown, CircleDot, Leaf, PackageCheck, Recycle } from "lucide-react";
 import {
-  FinalCTA,
   ImagePanel,
   PageHero,
   Reveal,
@@ -121,8 +120,6 @@ function Sustainability() {
           </Reveal>
         </div>
       </section>
-
-      <FinalCTA />
     </>
   );
 }
