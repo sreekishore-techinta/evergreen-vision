@@ -1,9 +1,8 @@
 Options -MultiViews
 RewriteEngine On
 
-# Serve backend PHP files directly — never rewrite those
-RewriteCond %{REQUEST_URI} ^/backend/ [OR]
-RewriteCond %{REQUEST_URI} ^/uploads/
+# Serve admin, backend, and uploads directly — never rewrite those
+RewriteCond %{REQUEST_URI} (^|/)(admin|backend|uploads)/
 RewriteRule ^ - [L]
 
 # Serve real files and directories directly (assets, images, videos, etc.)

@@ -36,6 +36,41 @@ $pdo->exec("
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ");
 
+// ── Ensure upload directories exist and seed from any available source ──
+(function() {
+    // Resolve the project/web root: backend is 2 levels deep (backend/api/slider.php)
+    $root = dirname(__DIR__, 2);
+
+    $slides_dir   = $root . '/uploads/slides/';
+    if (!is_dir($slides_dir)) @mkdir($slides_dir, 0755, true);
+
+    // Source candidates in priority order:
+    // 1. src/assets/ (local dev environment)
+    // 2. public/uploads/slides/ (Vite copies public/ → root on build)
+    // 3. Already in uploads/slides/ — nothing to do
+    $asset_sources = [
+        $root . '/src/assets/',
+        $root . '/public/uploads/slides/',
+    ];
+
+    $assets = [
+        'home.png', 'home hero sec.png', 'evergreen-hero.jpg', 'sprout-in-hands.jpg',
+        'product-collection.jpg', 'solution.png', 'substain.png', 'cpcb-certificate.png'
+    ];
+
+    foreach ($assets as $file) {
+        $dest = $slides_dir . $file;
+        if (file_exists($dest)) continue; // already there
+        foreach ($asset_sources as $src_dir) {
+            $src = $src_dir . $file;
+            if (file_exists($src)) {
+                @copy($src, $dest);
+                break;
+            }
+        }
+    }
+})();
+
 // ── Page Names Map ─────────────────────────────────────────
 $PAGE_NAMES = [
     'home'           => 'Home Page',
@@ -67,11 +102,19 @@ if ($method === 'GET') {
     $stmt->execute($params);
     $slides = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Resolve image URLs
+    // Resolve image URLs with bare filename prefixing
     foreach ($slides as &$s) {
         $s['image_url_raw'] = $s['image_url'];
-        if (!empty($s['image_url']) && !preg_match('#^https?://#i', $s['image_url'])) {
-            $s['image_url'] = rtrim(BASE_URL, '/') . '/' . ltrim($s['image_url'], '/');
+        if (!empty($s['image_url'])) {
+            if (preg_match('#^https?://#i', $s['image_url'])) {
+                // already absolute
+            } else {
+                $clean = ltrim($s['image_url'], '/');
+                if (!str_starts_with($clean, 'uploads/') && !str_starts_with($clean, 'src/assets/')) {
+                    $clean = 'uploads/slides/' . $clean;
+                }
+                $s['image_url'] = rtrim(BASE_URL, '/') . '/' . $clean;
+            }
         }
     }
     unset($s);

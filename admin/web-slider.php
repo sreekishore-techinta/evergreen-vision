@@ -89,11 +89,83 @@ $PAGES = [
     ],
 ];
 
-// Helper to resolve image URL
+// ── Ensure upload directories exist and seed from any available source ──
+(function() {
+    // admin/ is 1 level deep, so dirname(__DIR__) = project/web root
+    $root         = dirname(__DIR__);
+    $slides_dir   = $root . '/uploads/slides/';
+    $products_dir = $root . '/uploads/products/';
+
+    if (!is_dir($slides_dir))   @mkdir($slides_dir, 0755, true);
+    if (!is_dir($products_dir)) @mkdir($products_dir, 0755, true);
+
+    // Source candidates in priority order:
+    // 1. src/assets/ (local dev)
+    // 2. public/uploads/slides/ (Vite copies public/ → root on build/deploy)
+    $asset_sources = [
+        $root . '/src/assets/',
+        $root . '/public/uploads/slides/',
+    ];
+
+    $assets = [
+        'home.png', 'home hero sec.png', 'evergreen-hero.jpg', 'sprout-in-hands.jpg',
+        'product-collection.jpg', 'solution.png', 'substain.png', 'cpcb-certificate.png',
+        'compostable-bags-blank.jpg', 'compostable-waste-bags.jpg', 'breathable-produce-pouches.jpg',
+        'biopolymer-granules.jpg', 'eco-lifestyle-bag.jpg', 'product-shopping-bag.jpg',
+        'product-bio-carry.jpg', 'product-tshirt-bag.jpg', 'manufacturing.jpg', 'material-journey.jpg',
+        'cta-bags-showcase.jpg', 'e-logo.png'
+    ];
+
+    foreach ($assets as $file) {
+        $slide_dest = $slides_dir . $file;
+        $prod_dest  = $products_dir . $file;
+        foreach ($asset_sources as $src_dir) {
+            $src = $src_dir . $file;
+            if (file_exists($src)) {
+                if (!file_exists($slide_dest)) @copy($src, $slide_dest);
+                if (!file_exists($prod_dest))  @copy($src, $prod_dest);
+                break;
+            }
+        }
+    }
+})();
+
+// Helper to resolve image URL with disk existence check & multi-source fallback
 function resolve_slide_img($url): string {
     if (!$url) return '';
     if (preg_match('#^https?://#i', $url)) return $url;
+
     $clean = ltrim($url, '/');
+
+    // Normalize bare filenames like "home.png" → uploads/slides/home.png
+    if (!str_starts_with($clean, 'uploads/') && !str_starts_with($clean, 'src/assets/')) {
+        $clean = 'uploads/slides/' . $clean;
+    }
+
+    // admin/ is 1 level deep — root is dirname(__DIR__)
+    $root      = dirname(__DIR__);
+    $disk_path = $root . '/' . $clean;
+
+    // File already exists at target — serve it
+    if (file_exists($disk_path)) {
+        return rtrim(BASE_URL, '/') . '/' . $clean;
+    }
+
+    // Not found — try to auto-copy from known source locations
+    $fname    = basename($clean);
+    $fallbacks = [
+        $root . '/src/assets/' . $fname,            // local dev
+        $root . '/public/uploads/slides/' . $fname, // Vite deploy source
+    ];
+
+    foreach ($fallbacks as $src) {
+        if (file_exists($src)) {
+            @copy($src, $disk_path);
+            return rtrim(BASE_URL, '/') . '/' . $clean;
+        }
+    }
+
+    // Return the URL anyway (browser will show broken image)
     return rtrim(BASE_URL, '/') . '/' . $clean;
 }
 
@@ -491,7 +563,7 @@ include __DIR__ . '/includes/header.php';
      JAVASCRIPT LOGIC
 ═══════════════════════════════════════════════════════════ -->
 <script>
-const API = '<?= API_URL ?>/slider.php';
+const SLIDER_API = '<?= API_URL ?>/slider.php';
 const PAGES_CONFIG = <?= json_encode($PAGES) ?>;
 
 // All slides loaded from server
@@ -638,7 +710,7 @@ async function submitSlide(e) {
   const id = document.getElementById('slide-id').value;
   const fd = new FormData(document.getElementById('slide-form'));
 
-  const url = id ? `${API}?action=update&id=${id}` : API;
+  const url = id ? `${SLIDER_API}?action=update&id=${id}` : SLIDER_API;
 
   try {
     const res = await fetch(url, { method: 'POST', body: fd, credentials: 'include' });
@@ -673,7 +745,7 @@ async function deleteSlide(id, btn) {
   if (!confirm('Are you sure you want to delete this slide permanently?')) return;
   btn.disabled = true;
   try {
-    const res = await fetch(`${API}?action=delete&id=${id}`, { method: 'POST', credentials: 'include' });
+    const res = await fetch(`${SLIDER_API}?action=delete&id=${id}`, { method: 'POST', credentials: 'include' });
     const json = await res.json();
     if (!json.success) throw new Error(json.message);
     slides = slides.filter(s => s.id != id);
@@ -711,7 +783,7 @@ document.getElementById('slides-container').addEventListener('change', async fun
   fd.append('is_active',   isActive);
 
   try {
-    const res = await fetch(`${API}?action=update&id=${id}`, { method: 'POST', body: fd, credentials: 'include' });
+    const res = await fetch(`${SLIDER_API}?action=update&id=${id}`, { method: 'POST', body: fd, credentials: 'include' });
     const json = await res.json();
     if (!json.success) throw new Error(json.message);
     slide.is_active = isActive;
@@ -870,7 +942,7 @@ function initDrag() {
     });
 
     try {
-      const res = await fetch(`${API}?action=reorder`, {
+      const res = await fetch(`${SLIDER_API}?action=reorder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

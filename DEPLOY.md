@@ -40,6 +40,9 @@ dist/
 ├── favicon.svg         → public_html/favicon.svg
 ├── e-logo.png          → public_html/e-logo.png
 ├── robots.txt          → public_html/robots.txt
+├── uploads/            → public_html/uploads/    ← CRITICAL: hero + product images
+│   ├── slides/         → public_html/uploads/slides/
+│   └── products/       → public_html/uploads/products/
 └── *.mp4 videos        → public_html/*.mp4
 ```
 
@@ -59,15 +62,22 @@ Final structure on live server:
 ```
 public_html/
 ├── index.html          ← React SPA
-├── assets/             ← JS, CSS, images
+├── assets/             ← JS, CSS, hashed assets
 ├── .htaccess           ← SPA routing + backend passthrough
+├── uploads/            ← hero slide + product images (755 writable)
+│   ├── slides/         ← slider images (sprout-in-hands.jpg, home.png, etc.)
+│   └── products/       ← product images
 ├── backend/            ← PHP API
 │   ├── api/
 │   └── config/
 │       └── db.php      ← UPDATE credentials for live DB
-├── admin/              ← PHP admin panel
-└── uploads/            ← product images (writable 755)
+└── admin/              ← PHP admin panel
 ```
+
+> **Root cause of 404 image errors**: If `uploads/` is missing or empty on the live server,
+> hero images will 404. The `dist/uploads/` folder (built above) contains all images.
+> Upload it along with the rest of `dist/`.  
+> Alternatively, run the one-time sync script after upload (see Part H below).
 
 ---
 
@@ -154,6 +164,23 @@ chmod 644 public_html/backend/config/config.php
 
 ---
 
+## Part H — Fix 404 image errors on live server (one-time)
+
+If hero images return 404 on the live site after deploying:
+
+**Option 1 — Upload `dist/uploads/` (easiest)**  
+Make sure you uploaded the `dist/uploads/` folder to `public_html/uploads/` — it contains all slide/product images.
+
+**Option 2 — Run the sync script**  
+Upload `backend/sync_assets.php` to `public_html/backend/` then visit:
+```
+https://yourdomain.com/backend/sync_assets.php?token=ev_sync_2025
+```
+The script will copy all images from `public_html/uploads/slides/` → `uploads/slides/`.
+**Delete `sync_assets.php` from the server immediately after running.**
+
+---
+
 ## Quick re-deploy (after code changes)
 
 ```powershell
@@ -163,6 +190,7 @@ $env:VITE_BASE_PATH="/"; npm run build:static
 # 2. Upload ONLY these via FTP/cPanel File Manager:
 #    dist/assets/          ← new hashed JS/CSS files
 #    dist/index.html       ← updated entry point
+#    dist/uploads/         ← upload if you changed any images
 #    src/**                ← NOT needed on server (source only)
 ```
 

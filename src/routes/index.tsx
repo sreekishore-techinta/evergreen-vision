@@ -181,6 +181,7 @@ function HeroSlider() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.7, ease: "easeInOut" }}
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = heroHeroImg; }}
         />
       </AnimatePresence>
 
