@@ -147,8 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="login-footer">
       &larr; <a href="../">Back to website</a>
-      &nbsp;&nbsp;·&nbsp;&nbsp;
-      Default: <strong>admin</strong> / <strong>Admin@1234</strong>
     </div>
   </div>
 </div>

@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Default admin: username=admin  password=Admin@1234
+-- Default admin account (change password after first login)
 -- (bcrypt hash generated with PASSWORD_BCRYPT cost 12)
 INSERT INTO `admin_users`
   (`username`, `email`, `password_hash`, `full_name`, `role`)
@@ -111,8 +111,8 @@ INSERT INTO `site_settings` (`setting_key`,`setting_val`,`label`,`group_name`,`s
 ('twitter_url',       '',                                    'Twitter/X URL',       'social',   4),
 ('meta_title',        'EVERGREENINDUSTRY | Sustainable Packaging', 'Meta Title',   'seo',      1),
 ('meta_description',  'Biodegradable and compostable packaging solutions designed for responsible businesses.', 'Meta Description', 'seo', 2),
-('google_analytics',  '',                                    'Google Analytics ID', 'seo',      3),
-('enquiry_notify_email','admin@evergreenindustry.com',       'Notify Email (Enquiries)', 'notifications', 1);
+('google_analytics',  '',                                    'Analytics Tracking ID (GA4)', 'seo',      3),
+('enquiry_notify_email','info@evergreenindustry.com',       'Site Enquiry Notification Email', 'notifications', 1);
 
 -- ─── Admin Activity Log ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `admin_activity_log` (

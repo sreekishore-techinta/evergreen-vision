@@ -22,19 +22,19 @@ export const Route = createFileRoute("/about")({
 
 function About() {
   return (
-    <div className="bg-[#eef4ee] min-h-screen">
+    <div className="bg-white min-h-screen">
       {/* ==================================================================== */}
       {/* 1. ABOUT HERO — VIBRANT & BRIGHT (ZERO DARK SHADES)                  */}
       {/* ==================================================================== */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 px-6 sm:px-10 lg:px-16 border-b border-[#c8dac8]/60 overflow-hidden">
+      <section className="relative pt-32 pb-12 lg:pt-40 lg:pb-16 px-6 sm:px-10 lg:px-16 border-b border-[#e8f0e8] overflow-hidden">
         {/* Subtle background ambient light */}
-        <div className="absolute -top-24 right-0 w-[500px] h-[500px] rounded-full bg-[#7da482]/15 blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 right-0 w-[500px] h-[500px] rounded-full bg-emerald-100/40 blur-3xl pointer-events-none" />
 
         <div className="relative mx-auto max-w-[1450px]">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Narrative */}
             <div className="lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#b8d4b8] text-[11px] font-mono uppercase tracking-[0.22em] text-[#24452e] shadow-sm">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-mono uppercase tracking-[0.22em] text-[#24452e] shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-[#4a7354] animate-pulse" />
                 <span>Our Heritage & Purpose</span>
               </div>
@@ -114,23 +114,23 @@ function About() {
       {/* ==================================================================== */}
       {/* 2. WHY WE EXIST SECTION                                              */}
       {/* ==================================================================== */}
-      <section className="px-6 sm:px-10 lg:px-16 py-24 lg:py-36">
-        <div className="mx-auto grid max-w-[1350px] gap-16 lg:grid-cols-2 lg:items-center">
+      <section className="px-6 sm:px-10 lg:px-16 py-12 lg:py-16">
+        <div className="mx-auto grid max-w-[1350px] gap-12 lg:grid-cols-2 lg:items-center">
           <SectionTitle
             eyebrow="Why we exist"
             title="A practical path beyond conventional plastic."
             copy="EVERGREENINDUSTRY was built around a clear idea: environmental responsibility should not come at the cost of everyday performance. We develop biodegradable and compostable packaging with real commercial needs in mind."
           />
-          <ImagePanel src={materialsImage} alt="Biodegradable material research" className="aspect-square shadow-xl border border-[#c8dac8]" />
+          <ImagePanel src={materialsImage} alt="Biodegradable material research" className="aspect-square shadow-md border border-[#e8f0e8]" />
         </div>
       </section>
 
       {/* ==================================================================== */}
       {/* 3. 3D ANIMATED METRICS GRID                                          */}
       {/* ==================================================================== */}
-      <section className="relative py-20 lg:py-28 px-6 sm:px-10 lg:px-16 bg-[#e5f0e5] border-y border-[#c8dac8] overflow-hidden">
+      <section className="relative py-12 lg:py-16 px-6 sm:px-10 lg:px-16 bg-white border-y border-[#e8f0e8] overflow-hidden">
         {/* Soft background ambient glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#7da482]/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-emerald-50/60 blur-3xl rounded-full pointer-events-none" />
 
         <div className="relative z-10 mx-auto max-w-[1450px] space-y-10">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -156,15 +156,15 @@ function About() {
               transition={{ duration: 0.6, delay: 0 }}
               whileHover={{ y: -8, rotateX: -3, scale: 1.02 }}
               style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white/95 border border-[#b8d4b8] shadow-[0_10px_30px_rgba(20,50,25,0.06),0_2px_8px_rgba(20,50,25,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] hover:shadow-[0_24px_50px_-10px_rgba(20,50,25,0.22),inset_0_1px_0_rgba(255,255,255,1)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
+              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white border border-[#e8f0e8] shadow-[0_4px_20px_rgba(20,50,25,0.06)] hover:shadow-[0_16px_40px_-8px_rgba(20,50,25,0.14)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
             >
               {/* Top bevel highlight line */}
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-100 to-transparent pointer-events-none" />
 
               <div>
                 {/* Top bar with category tag and 3D icon badge */}
                 <div className="flex items-center justify-between gap-2 mb-6">
-                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#eaf4ea] text-[#24452e] border border-[#c2dec2]">
+                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-[#24452e] border border-emerald-200">
                     #Circularity
                   </span>
                   <div className="size-9 rounded-xl bg-gradient-to-br from-[#7da482]/25 to-[#3a6420]/10 border border-[#7da482]/30 flex items-center justify-center text-[#24452e] shadow-sm group-hover:scale-110 transition-transform">
@@ -186,7 +186,7 @@ function About() {
               </div>
 
               {/* Bottom status indicator */}
-              <div className="flex items-center justify-between pt-4 mt-6 border-t border-[#c8dac8]/70 text-[10px] font-mono text-[#24452e]">
+              <div className="flex items-center justify-between pt-4 mt-6 border-t border-emerald-100 text-[10px] font-mono text-[#24452e]">
                 <span>Pure Bio-Derived</span>
                 <CheckCircle2 className="size-3.5 text-[#4a7354]" />
               </div>
@@ -200,13 +200,13 @@ function About() {
               transition={{ duration: 0.6, delay: 0.1 }}
               whileHover={{ y: -8, rotateX: -3, scale: 1.02 }}
               style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white/95 border border-[#b8d4b8] shadow-[0_10px_30px_rgba(20,50,25,0.06),0_2px_8px_rgba(20,50,25,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] hover:shadow-[0_24px_50px_-10px_rgba(20,50,25,0.22),inset_0_1px_0_rgba(255,255,255,1)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
+              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white border border-[#e8f0e8] shadow-[0_4px_20px_rgba(20,50,25,0.06)] hover:shadow-[0_16px_40px_-8px_rgba(20,50,25,0.14)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-100 to-transparent pointer-events-none" />
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-6">
-                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#eaf4ea] text-[#24452e] border border-[#c2dec2]">
+                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-[#24452e] border border-emerald-200">
                     #ProductRange
                   </span>
                   <div className="size-9 rounded-xl bg-gradient-to-br from-[#7da482]/25 to-[#3a6420]/10 border border-[#7da482]/30 flex items-center justify-center text-[#24452e] shadow-sm group-hover:scale-110 transition-transform">
@@ -226,7 +226,7 @@ function About() {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-4 mt-6 border-t border-[#c8dac8]/70 text-[10px] font-mono text-[#24452e]">
+              <div className="flex items-center justify-between pt-4 mt-6 border-t border-emerald-100 text-[10px] font-mono text-[#24452e]">
                 <span>Commercial Scale</span>
                 <CheckCircle2 className="size-3.5 text-[#4a7354]" />
               </div>
@@ -240,13 +240,13 @@ function About() {
               transition={{ duration: 0.6, delay: 0.2 }}
               whileHover={{ y: -8, rotateX: -3, scale: 1.02 }}
               style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white/95 border border-[#b8d4b8] shadow-[0_10px_30px_rgba(20,50,25,0.06),0_2px_8px_rgba(20,50,25,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] hover:shadow-[0_24px_50px_-10px_rgba(20,50,25,0.22),inset_0_1px_0_rgba(255,255,255,1)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
+              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white border border-[#e8f0e8] shadow-[0_4px_20px_rgba(20,50,25,0.06)] hover:shadow-[0_16px_40px_-8px_rgba(20,50,25,0.14)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-100 to-transparent pointer-events-none" />
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-6">
-                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#eaf4ea] text-[#24452e] border border-[#c2dec2]">
+                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-[#24452e] border border-emerald-200">
                     #Verification
                   </span>
                   <div className="size-9 rounded-xl bg-gradient-to-br from-[#7da482]/25 to-[#3a6420]/10 border border-[#7da482]/30 flex items-center justify-center text-[#24452e] shadow-sm group-hover:scale-110 transition-transform">
@@ -266,7 +266,7 @@ function About() {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-4 mt-6 border-t border-[#c8dac8]/70 text-[10px] font-mono text-[#24452e]">
+              <div className="flex items-center justify-between pt-4 mt-6 border-t border-emerald-100 text-[10px] font-mono text-[#24452e]">
                 <span>CIPET Audited</span>
                 <CheckCircle2 className="size-3.5 text-[#4a7354]" />
               </div>
@@ -280,13 +280,13 @@ function About() {
               transition={{ duration: 0.6, delay: 0.3 }}
               whileHover={{ y: -8, rotateX: -3, scale: 1.02 }}
               style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white/95 border border-[#b8d4b8] shadow-[0_10px_30px_rgba(20,50,25,0.06),0_2px_8px_rgba(20,50,25,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] hover:shadow-[0_24px_50px_-10px_rgba(20,50,25,0.22),inset_0_1px_0_rgba(255,255,255,1)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
+              className="group relative h-full rounded-[2.25rem] p-6 sm:p-7 bg-white border border-[#e8f0e8] shadow-[0_4px_20px_rgba(20,50,25,0.06)] hover:shadow-[0_16px_40px_-8px_rgba(20,50,25,0.14)] hover:border-[#7da482] transition-all duration-300 flex flex-col justify-between"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-100 to-transparent pointer-events-none" />
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-6">
-                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#eaf4ea] text-[#24452e] border border-[#c2dec2]">
+                  <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-[#24452e] border border-emerald-200">
                     #MissionGoal
                   </span>
                   <div className="size-9 rounded-xl bg-gradient-to-br from-[#7da482]/25 to-[#3a6420]/10 border border-[#7da482]/30 flex items-center justify-center text-[#24452e] shadow-sm group-hover:scale-110 transition-transform">
@@ -306,7 +306,7 @@ function About() {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-4 mt-6 border-t border-[#c8dac8]/70 text-[10px] font-mono text-[#24452e]">
+              <div className="flex items-center justify-between pt-4 mt-6 border-t border-emerald-100 text-[10px] font-mono text-[#24452e]">
                 <span>Mission Aligned</span>
                 <CheckCircle2 className="size-3.5 text-[#4a7354]" />
               </div>
@@ -318,12 +318,12 @@ function About() {
       {/* ==================================================================== */}
       {/* 4. OUR PRINCIPLES                                                    */}
       {/* ==================================================================== */}
-      <section className="px-6 sm:px-10 lg:px-16 py-24 lg:py-36">
+      <section className="px-6 sm:px-10 lg:px-16 py-12 lg:py-16">
         <div className="mx-auto max-w-[1150px]">
           <SectionTitle eyebrow="Our principles" title="Purpose in every decision." />
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {["Material honesty", "Manufacturing discipline", "Long-term responsibility"].map((x, i) => (
-              <Reveal key={x} delay={i * 0.1} className="border-t border-[#7da482]/40 pt-8 space-y-3">
+              <Reveal key={x} delay={i * 0.1} className="border-t border-emerald-200 pt-8 space-y-3">
                 <span className="text-xs font-mono text-[#355a3f] font-bold">0{i + 1}</span>
                 <h3 className="text-2xl sm:text-3xl text-[#0e2617] font-display">{x}</h3>
                 <p className="mt-4 leading-relaxed text-[#526456] text-sm">

@@ -32,7 +32,7 @@ $group_labels = [
     'contact'       => ['Contact Info', 'email, phone, address'],
     'social'        => ['Social Media', 'social profile links'],
     'seo'           => ['SEO & Analytics', 'meta tags and tracking'],
-    'notifications' => ['Notifications', 'email alert settings'],
+    'notifications' => ['Notifications', 'site enquiry alert email'],
 ];
 
 $group_icons = [

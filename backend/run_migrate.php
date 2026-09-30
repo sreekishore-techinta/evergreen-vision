@@ -178,7 +178,7 @@ $settings = [
     ['whatsapp_number','+91 73392 85437','WhatsApp Number','contact',4],
     ['meta_title','EVERGREENINDUSTRY | Sustainable Packaging','Meta Title','seo',1],
     ['meta_description','Biodegradable and compostable packaging solutions.','Meta Description','seo',2],
-    ['enquiry_notify_email','admin@evergreenindustry.com','Notify Email','notifications',1],
+    ['enquiry_notify_email','info@evergreenindustry.com','Site Enquiry Notification Email','notifications',1],
 ];
 $ins = $pdo->prepare("INSERT IGNORE INTO site_settings (setting_key,setting_val,label,group_name,sort_order) VALUES (?,?,?,?,?)");
 foreach ($settings as $s) { try { $ins->execute($s); } catch (PDOException) {} }
