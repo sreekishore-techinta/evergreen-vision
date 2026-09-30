@@ -99,7 +99,7 @@ function HeroSlider() {
     : "";
 
   useEffect(() => {
-    fetch(`${API_BASE}/backend/api/slider.php?active=1`)
+    fetch(`${API_BASE}/backend/api/slider.php?active=1&page=home`)
       .then(r => r.json())
       .then(json => { if (json.success && json.data?.length) setSlides(json.data); })
       .catch(() => { /* silently fall back to static */ });

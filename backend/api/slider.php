@@ -36,11 +36,46 @@ $pdo->exec("
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ");
 
+// ── Page Names Map ─────────────────────────────────────────
+$PAGE_NAMES = [
+    'home'           => 'Home Page',
+    'about'          => 'About Us',
+    'products'       => 'Products',
+    'segment'        => 'Solutions / Segments',
+    'sustainability' => 'Sustainability',
+    'certificate'    => 'Certifications',
+    'contact'        => 'Contact Us',
+];
+
 // ── GET — public list ──────────────────────────────────────
 if ($method === 'GET') {
     $activeOnly = ($_GET['active'] ?? '1') === '1';
-    $sql = 'SELECT * FROM hero_slides' . ($activeOnly ? ' WHERE is_active=1' : '') . ' ORDER BY sort_order ASC, id ASC';
-    $slides = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    $page       = trim($_GET['page'] ?? '');
+
+    $where  = [];
+    $params = [];
+    if ($activeOnly) {
+        $where[] = 'is_active = 1';
+    }
+    if ($page !== '' && $page !== 'all') {
+        $where[] = 'page_key = ?';
+        $params[] = $page;
+    }
+    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    $stmt = $pdo->prepare("SELECT * FROM hero_slides $whereSql ORDER BY sort_order ASC, id ASC");
+    $stmt->execute($params);
+    $slides = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Resolve image URLs
+    foreach ($slides as &$s) {
+        $s['image_url_raw'] = $s['image_url'];
+        if (!empty($s['image_url']) && !preg_match('#^https?://#i', $s['image_url'])) {
+            $s['image_url'] = rtrim(BASE_URL, '/') . '/' . ltrim($s['image_url'], '/');
+        }
+    }
+    unset($s);
+
     json_ok($slides, 'Slides fetched.');
 }
 
@@ -63,6 +98,8 @@ if ($method === 'POST' && $action === 'reorder') {
 // ── POST update ───────────────────────────────────────────
 if ($method === 'POST' && $action === 'update') {
     if (!$id) json_err('Slide ID required.', 400);
+    $page_key    = sanitize($_POST['page_key']    ?? 'home');
+    $page_name   = sanitize($_POST['page_name']   ?? ($PAGE_NAMES[$page_key] ?? ucfirst($page_key)));
     $title       = sanitize($_POST['title']       ?? '');
     $subtitle    = sanitize($_POST['subtitle']    ?? '');
     $description = sanitize($_POST['description'] ?? '');
@@ -77,11 +114,15 @@ if ($method === 'POST' && $action === 'update') {
     }
 
     $stmt = $pdo->prepare(
-        'UPDATE hero_slides SET title=?, subtitle=?, description=?, button_text=?, button_url=?, image_url=?, is_active=?, sort_order=? WHERE id=?'
+        'UPDATE hero_slides SET page_key=?, page_name=?, title=?, subtitle=?, description=?, button_text=?, button_url=?, image_url=?, is_active=?, sort_order=? WHERE id=?'
     );
-    $stmt->execute([$title, $subtitle, $description, $button_text, $button_url, $image_url, $is_active, $sort_order, $id]);
-    log_activity('slider_update', "Updated slide #$id: $title");
+    $stmt->execute([$page_key, $page_name, $title, $subtitle, $description, $button_text, $button_url, $image_url, $is_active, $sort_order, $id]);
+    log_activity('slider_update', "Updated slide #$id for [$page_name]: $title");
     $slide = $pdo->query("SELECT * FROM hero_slides WHERE id=$id")->fetch(PDO::FETCH_ASSOC);
+    if ($slide && !empty($slide['image_url']) && !preg_match('#^https?://#i', $slide['image_url'])) {
+        $slide['image_url_raw'] = $slide['image_url'];
+        $slide['image_url'] = rtrim(BASE_URL, '/') . '/' . ltrim($slide['image_url'], '/');
+    }
     json_ok($slide, 'Slide updated.');
 }
 
@@ -97,6 +138,8 @@ if ($method === 'POST' && $action === 'delete') {
 
 // ── POST — create ─────────────────────────────────────────
 if ($method === 'POST') {
+    $page_key    = sanitize($_POST['page_key']    ?? 'home');
+    $page_name   = sanitize($_POST['page_name']   ?? ($PAGE_NAMES[$page_key] ?? ucfirst($page_key)));
     $title       = sanitize($_POST['title']       ?? '');
     $subtitle    = sanitize($_POST['subtitle']    ?? '');
     $description = sanitize($_POST['description'] ?? '');
@@ -105,8 +148,10 @@ if ($method === 'POST') {
     $is_active   = isset($_POST['is_active']) ? (int)$_POST['is_active'] : 1;
     $image_url   = sanitize($_POST['image_url']   ?? '');
 
-    // Auto sort_order = max + 1
-    $max_order = (int)$pdo->query('SELECT COALESCE(MAX(sort_order),0) FROM hero_slides')->fetchColumn();
+    // Auto sort_order = max for this page + 1
+    $max_stmt = $pdo->prepare('SELECT COALESCE(MAX(sort_order),0) FROM hero_slides WHERE page_key=?');
+    $max_stmt->execute([$page_key]);
+    $max_order = (int)$max_stmt->fetchColumn();
     $sort_order = $max_order + 1;
 
     if (!empty($_FILES['image']['name'])) {
@@ -114,13 +159,17 @@ if ($method === 'POST') {
     }
 
     $stmt = $pdo->prepare(
-        'INSERT INTO hero_slides (title, subtitle, description, button_text, button_url, image_url, is_active, sort_order)
-         VALUES (?,?,?,?,?,?,?,?)'
+        'INSERT INTO hero_slides (page_key, page_name, title, subtitle, description, button_text, button_url, image_url, is_active, sort_order)
+         VALUES (?,?,?,?,?,?,?,?,?,?)'
     );
-    $stmt->execute([$title, $subtitle, $description, $button_text, $button_url, $image_url, $is_active, $sort_order]);
+    $stmt->execute([$page_key, $page_name, $title, $subtitle, $description, $button_text, $button_url, $image_url, $is_active, $sort_order]);
     $new_id = $pdo->lastInsertId();
-    log_activity('slider_create', "Created slide #$new_id: $title");
+    log_activity('slider_create', "Created slide #$new_id for [$page_name]: $title");
     $slide = $pdo->query("SELECT * FROM hero_slides WHERE id=$new_id")->fetch(PDO::FETCH_ASSOC);
+    if ($slide && !empty($slide['image_url']) && !preg_match('#^https?://#i', $slide['image_url'])) {
+        $slide['image_url_raw'] = $slide['image_url'];
+        $slide['image_url'] = rtrim(BASE_URL, '/') . '/' . ltrim($slide['image_url'], '/');
+    }
     json_ok($slide, 'Slide created.', 201);
 }
 

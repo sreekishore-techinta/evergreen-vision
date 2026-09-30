@@ -19,6 +19,20 @@ function product_slug(string $name, PDO $pdo, int $exclude_id = 0): string {
     return $slug;
 }
 
+// ── Helper: resolve full product image URL ─────────────────────
+function get_product_image_url($p): string {
+    if (empty($p)) return '';
+    $img = !empty($p['image_path']) ? $p['image_path'] : (!empty($p['image_url']) ? $p['image_url'] : '');
+    if (!$img) return '';
+    if (preg_match('#^https?://#i', $img)) return $img;
+
+    $clean = ltrim($img, '/');
+    if (!str_starts_with($clean, 'uploads/') && !str_starts_with($clean, 'src/')) {
+        $clean = 'uploads/products/' . $clean;
+    }
+    return rtrim(BASE_URL, '/') . '/' . $clean;
+}
+
 // ── Handle image upload via AJAX ─────────────────────────────
 // (products.php also acts as upload target from JS)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'upload_image') {
@@ -125,11 +139,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($flash_type !== 'error') {
                 $slug = product_slug($name, $pdo, $id);
 
+                $image_url_val = $image_path ? basename($image_path) : '';
+
                 if ($id > 0) {
                     $pdo->prepare(
                         'UPDATE products SET
                            name=?, slug=?, category_id=?, category=?, description=?,
-                           features=?, applications=?, image_path=?, certifications=?,
+                           features=?, applications=?, image_path=?, image_url=?, certifications=?,
                            is_featured=?, is_active=?, sort_order=?
                          WHERE id=?'
                     )->execute([
@@ -139,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         sanitize($_POST['features']    ?? ''),
                         sanitize($_POST['applications']?? ''),
                         $image_path,
+                        $image_url_val,
                         sanitize($_POST['certifications'] ?? ''),
                         isset($_POST['is_featured']) ? 1 : 0,
                         isset($_POST['is_active'])   ? 1 : 0,
@@ -151,8 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->prepare(
                         'INSERT INTO products
                            (name, slug, category_id, category, description, features,
-                            applications, image_path, certifications, is_featured, is_active, sort_order)
-                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
+                            applications, image_path, image_url, certifications, is_featured, is_active, sort_order)
+                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
                     )->execute([
                         sanitize($name), $slug,
                         $category_id ?: null, $cat_name,
@@ -160,6 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         sanitize($_POST['features']    ?? ''),
                         sanitize($_POST['applications']?? ''),
                         $image_path,
+                        $image_url_val,
                         sanitize($_POST['certifications'] ?? ''),
                         isset($_POST['is_featured']) ? 1 : 0,
                         isset($_POST['is_active'])   ? 1 : 0,
@@ -312,13 +330,14 @@ include __DIR__ . '/includes/header.php';
         <label class="form-label">Product Image</label>
         <div class="upload-zone" id="uploadZone">
           <!-- Preview -->
-          <div id="imgPreviewWrap" style="<?= empty($edit_row['image_path']) ? 'display:none' : '' ?>margin-bottom:14px">
+          <?php $current_img = $edit_row ? get_product_image_url($edit_row) : ''; ?>
+          <div id="imgPreviewWrap" style="<?= empty($current_img) ? 'display:none;' : '' ?>margin-bottom:14px">
             <img id="imgPreview"
-                 src="<?= $edit_row['image_path'] ? BASE_URL . htmlspecialchars($edit_row['image_path']) : '' ?>"
+                 src="<?= htmlspecialchars($current_img) ?>"
                  alt="Preview"
                  style="max-height:180px;max-width:100%;border-radius:10px;object-fit:cover;border:2px solid var(--border)">
-            <button type="button" id="removeImg" class="btn btn-danger btn-sm" style="margin-top:8px;display:block"
-                    <?= empty($edit_row['image_path']) ? 'style="display:none"' : '' ?>>
+            <input type="hidden" name="existing_image_path" id="existing_image_path" value="<?= htmlspecialchars($edit_row['image_path'] ?? ($edit_row['image_url'] ?? '')) ?>">
+            <button type="button" id="removeImg" class="btn btn-danger btn-sm" style="margin-top:8px;<?= empty($current_img) ? 'display:none;' : 'display:inline-flex;' ?>">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               Remove Image
             </button>
@@ -433,10 +452,15 @@ include __DIR__ . '/includes/header.php';
         <?php foreach ($products as $p): ?>
         <tr>
           <td>
-            <?php if ($p['image_path']): ?>
-              <img src="<?= BASE_URL . htmlspecialchars($p['image_path']) ?>"
+            <?php $p_img = get_product_image_url($p); ?>
+            <?php if ($p_img): ?>
+              <img src="<?= htmlspecialchars($p_img) ?>"
                    alt="<?= htmlspecialchars($p['name']) ?>"
-                   style="width:56px;height:42px;object-fit:cover;border-radius:7px;border:1px solid var(--border)">
+                   style="width:56px;height:42px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+              <div style="display:none;width:56px;height:42px;background:var(--sand);border-radius:7px;place-items:center;border:1px dashed var(--border-dark)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5M21 6.75A2.25 2.25 0 0018.75 4.5H5.25A2.25 2.25 0 003 6.75v10.5A2.25 2.25 0 005.25 19.5H18.75A2.25 2.25 0 0021 17.25V6.75z"/></svg>
+              </div>
             <?php else: ?>
               <div style="width:56px;height:42px;background:var(--sand);border-radius:7px;display:grid;place-items:center;border:1px dashed var(--border-dark)">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:18px;height:18px;color:var(--muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5M21 6.75A2.25 2.25 0 0018.75 4.5H5.25A2.25 2.25 0 003 6.75v10.5A2.25 2.25 0 005.25 19.5H18.75A2.25 2.25 0 0021 17.25V6.75z"/></svg>
