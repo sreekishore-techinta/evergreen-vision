@@ -57,7 +57,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="robots" content="noindex, nofollow">
   <title>Admin Login — Evergreen Industry</title>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/admin.css?v=<?= file_exists(__DIR__ . '/assets/css/admin.css') ? filemtime(__DIR__ . '/assets/css/admin.css') : time() ?>">
+  <style>
+    .password-field-wrapper {
+      position: relative !important;
+      display: block !important;
+      width: 100% !important;
+    }
+    .password-field-wrapper input {
+      width: 100% !important;
+      padding: 12px 46px 12px 40px !important;
+      border: 1.5px solid var(--border-dark, #e5e7eb) !important;
+      border-radius: 10px !important;
+      font-size: .88rem !important;
+      color: var(--ink, #1f2937) !important;
+      background: #fff !important;
+      outline: none !important;
+      box-sizing: border-box !important;
+      transition: all var(--transition, 0.2s) !important;
+    }
+    .password-field-wrapper input:focus {
+      border-color: var(--green-500, #22c55e) !important;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15) !important;
+    }
+    .password-field-wrapper .input-leading-icon {
+      position: absolute !important;
+      left: 13px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      width: 16px !important;
+      height: 16px !important;
+      color: var(--muted, #9ca3af) !important;
+      pointer-events: none !important;
+      z-index: 2 !important;
+    }
+    .password-eye-btn {
+      position: absolute !important;
+      right: 8px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      width: 34px !important;
+      height: 34px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: transparent !important;
+      border: none !important;
+      outline: none !important;
+      border-radius: 7px !important;
+      cursor: pointer !important;
+      color: #94a3b8 !important;
+      z-index: 10 !important;
+      transition: color 0.15s ease, background-color 0.15s ease !important;
+    }
+    .password-eye-btn:hover {
+      color: #16a34a !important;
+      background-color: rgba(22, 163, 74, 0.1) !important;
+    }
+    .password-eye-btn svg {
+      width: 18px !important;
+      height: 18px !important;
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      transform: none !important;
+      pointer-events: none !important;
+      color: inherit !important;
+    }
+    input::-ms-reveal,
+    input::-ms-clear {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
 <div class="login-page">
@@ -122,8 +195,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <div class="form-group">
         <label class="form-label" for="password">Password</label>
-        <div class="login-input-wrap">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <div class="password-field-wrapper">
+          <svg class="input-leading-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
           </svg>
           <input
@@ -133,24 +206,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             placeholder="••••••••"
             autocomplete="current-password"
             required
-            style="padding-right:44px"
           >
           <button
             type="button"
             id="togglePassword"
-            class="login-pwd-toggle"
-            onclick="togglePwd()"
-            title="Show / hide password"
-            aria-label="Show or hide password"
+            class="password-eye-btn"
+            title="Show password"
+            aria-label="Show password"
           >
-            <!-- Eye icon (shown when password is hidden) -->
-            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <!-- Standard Eye icon (Show password) -->
+            <svg class="eye-icon-show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
             </svg>
-            <!-- Eye-slash icon (shown when password is visible) -->
-            <svg id="eye-slash-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="display:none">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
+            <!-- Standard Eye-Off icon (Hide password) -->
+            <svg class="eye-icon-hide" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
             </svg>
           </button>
         </div>
@@ -227,21 +299,45 @@ function resetBtn() {
 }
 
 // ── Password visibility toggle ────────────────────────────
-function togglePwd() {
-  const input     = document.getElementById('password');
-  const eyeIcon   = document.getElementById('eye-icon');
-  const slashIcon = document.getElementById('eye-slash-icon');
-  if (!input) return;
-  const isHidden  = input.type === 'password';
-  input.type      = isHidden ? 'text' : 'password';
-  if (eyeIcon)   eyeIcon.style.display   = isHidden ? 'none'  : 'block';
-  if (slashIcon) slashIcon.style.display = isHidden ? 'block' : 'none';
+function togglePwd(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const input = document.getElementById('password');
+  const btn   = document.getElementById('togglePassword');
+  if (!input || !btn) return;
+
+  const showIcon = btn.querySelector('.eye-icon-show');
+  const hideIcon = btn.querySelector('.eye-icon-hide');
+  const isCurrentlyPassword = (input.type === 'password');
+
+  if (isCurrentlyPassword) {
+    input.setAttribute('type', 'text');
+    input.type = 'text';
+    if (showIcon) showIcon.style.display = 'none';
+    if (hideIcon) hideIcon.style.display = 'block';
+    btn.setAttribute('title', 'Hide password');
+    btn.setAttribute('aria-label', 'Hide password');
+  } else {
+    input.setAttribute('type', 'password');
+    input.type = 'password';
+    if (showIcon) showIcon.style.display = 'block';
+    if (hideIcon) hideIcon.style.display = 'none';
+    btn.setAttribute('title', 'Show password');
+    btn.setAttribute('aria-label', 'Show password');
+  }
+
+  try {
+    const len = input.value.length;
+    input.setSelectionRange(len, len);
+  } catch(_) {}
   input.focus();
 }
 
 const toggleBtn = document.getElementById('togglePassword');
 if (toggleBtn) {
-  toggleBtn.addEventListener('click', togglePwd);
+  toggleBtn.onclick = togglePwd;
 }
 </script>
 <style>

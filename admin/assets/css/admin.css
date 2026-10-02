@@ -1063,15 +1063,18 @@ select.form-control { cursor: pointer; }
   pointer-events: none;
 }
 
-.login-pwd-toggle {
+.login-pwd-toggle,
+.password-eye-btn {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 0;
   border-radius: 6px;
   color: var(--muted);
   display: flex;
@@ -1079,15 +1082,17 @@ select.form-control { cursor: pointer; }
   justify-content: center;
   line-height: 1;
   transition: color var(--transition), background-color var(--transition);
-  z-index: 5;
+  z-index: 10;
 }
 
-.login-pwd-toggle:hover {
+.login-pwd-toggle:hover,
+.password-eye-btn:hover {
   color: var(--green-600);
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(22, 163, 74, 0.08);
 }
 
-.login-pwd-toggle svg {
+.login-pwd-toggle svg,
+.password-eye-btn svg {
   position: static !important;
   left: auto !important;
   top: auto !important;
@@ -1095,7 +1100,22 @@ select.form-control { cursor: pointer; }
   width: 18px !important;
   height: 18px !important;
   color: currentColor !important;
-  pointer-events: auto !important;
+  pointer-events: none !important;
+}
+
+.input-password-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.input-password-wrap .form-control {
+  padding-right: 42px;
+}
+
+.input-password-wrap .password-eye-btn {
+  right: 6px;
+  z-index: 5;
 }
 
 .login-input-wrap input {
