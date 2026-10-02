@@ -1054,13 +1054,48 @@ select.form-control { cursor: pointer; }
   position: relative;
 }
 
-.login-input-wrap svg {
+.login-input-wrap > svg {
   position: absolute;
   left: 13px; top: 50%;
   transform: translateY(-50%);
   width: 16px; height: 16px;
   color: var(--muted);
   pointer-events: none;
+}
+
+.login-pwd-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: color var(--transition), background-color var(--transition);
+  z-index: 5;
+}
+
+.login-pwd-toggle:hover {
+  color: var(--green-600);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.login-pwd-toggle svg {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  transform: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: currentColor !important;
+  pointer-events: auto !important;
 }
 
 .login-input-wrap input {
