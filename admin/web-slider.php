@@ -201,10 +201,11 @@ foreach ($raw_slides as $s) {
 }
 
 // ── Actual current hero content visible on each live page ───────────
-// These match what is hardcoded in the React route components.
+// These EXACTLY match the hardcoded content in the React route components.
+// Edit here whenever a route's hero text/image changes.
 $PAGE_HEROES = [
     'home' => [
-        'eyebrow'     => 'Let\'s Reduce Plastic',
+        'eyebrow'     => "Let's Reduce Plastic",
         'headline'    => 'Sustainable Packaging for a Greener Tomorrow',
         'copy'        => 'High-quality biodegradable and compostable packaging solutions for a cleaner, healthier planet.',
         'cta_primary' => 'Get a Quote',
@@ -220,23 +221,23 @@ $PAGE_HEROES = [
         'image_hint'  => 'sprout-in-hands.jpg',
     ],
     'products' => [
-        'eyebrow'     => 'Commercial-Grade Compostable Packaging',
-        'headline'    => 'Engineered for Enterprise.',
-        'copy'        => 'Explore biodegradable bags and compostable packaging solutions engineered for modern commercial operations.',
+        'eyebrow'     => 'Certified Bio-Packaging Collection',
+        'headline'    => 'Performance, packed with purpose.',
+        'copy'        => 'A versatile collection of sustainable packaging solutions engineered to match commercial plastic durability without persistent environmental residue.',
         'cta_primary' => 'View Catalog',
         'cta_sec'     => '',
         'image_hint'  => 'product-collection.jpg',
     ],
     'segment' => [
-        'eyebrow'     => 'Our Segments & Capabilities',
-        'headline'    => 'Solutions Tailored Across 7 Core Industry Sectors',
-        'copy'        => 'Packaging, Food Service, Agriculture, Horticulture, Medical, Waste Management, and Disposable Cutlery.',
+        'eyebrow'     => 'Tailored Industry Deployments',
+        'headline'    => 'Our Segments',
+        'copy'        => 'Purpose-engineered biopolymers formulated to replace non-degradable single-use plastics across commercial, agricultural, food service, healthcare, and industrial sectors.',
         'cta_primary' => 'Explore Solutions',
         'cta_sec'     => '',
         'image_hint'  => 'solution.png',
     ],
     'sustainability' => [
-        'eyebrow'     => 'Our Circular Approach',
+        'eyebrow'     => 'Sustainability',
         'headline'    => 'A lifecycle, not a label.',
         'copy'        => 'We look beyond the product itself—considering material, manufacture, use and what happens next.',
         'cta_primary' => 'Learn More',
@@ -244,9 +245,9 @@ $PAGE_HEROES = [
         'image_hint'  => 'substain.png',
     ],
     'certificate' => [
-        'eyebrow'     => 'Central Pollution Control Board Approved',
-        'headline'    => 'Official Certification & CPCB Compliance',
-        'copy'        => 'Central Pollution Control Board (CPCB) official government certificate for marketing and selling 100% compostable carry bags compliant with IS/ISO:17088.',
+        'eyebrow'     => 'Official Government Regulatory Compliance',
+        'headline'    => 'Govt. of India Certified. Compostable Without Compromise.',
+        'copy'        => 'Fully approved and certified by the Central Pollution Control Board (CPCB), Ministry of Environment, Forest & Climate Change, Government of India.',
         'cta_primary' => 'View Certificate',
         'cta_sec'     => '',
         'image_hint'  => 'cpcb-certificate.png',
@@ -254,7 +255,7 @@ $PAGE_HEROES = [
     'contact' => [
         'eyebrow'     => 'Contact us',
         'headline'    => "Let's shape a better package.",
-        'copy'        => 'Tell us what your business needs. We\'ll help you explore a more responsible way forward.',
+        'copy'        => "Tell us what your business needs. We'll help you explore a more responsible way forward.",
         'cta_primary' => 'Send Enquiry',
         'cta_sec'     => '',
         'image_hint'  => 'evergreen-hero.jpg',
@@ -296,33 +297,39 @@ include __DIR__ . '/includes/header.php';
   <div class="card-header" style="border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
     <div class="card-title" style="font-size:1.02rem;display:flex;align-items:center;gap:8px">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="var(--green-600)" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-      <strong>Current Live Hero Sections (All Pages)</strong>
+      <strong>Current Live Hero Sections — All Pages</strong>
       <span class="badge" style="background:var(--green-100);color:var(--green-700);font-size:.72rem;padding:2px 8px;border-radius:20px"><?= count($PAGES) ?> Pages</span>
     </div>
-    <span class="text-muted text-sm">Showing the actual content currently visible to site visitors</span>
+    <span class="text-muted text-sm">Exact content & image currently visible on the live website</span>
   </div>
 
   <!-- Info notice -->
-  <div style="margin:0 20px;margin-top:16px;padding:10px 14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:#92400e">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#d97706" style="width:16px;height:16px;flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
-    <span>These cards show the <strong>actual hero content currently on the live website</strong>. The "Manage Slides" table below controls the database slider entries which can be used to update page hero sections.</span>
+  <div style="margin:0 20px;margin-top:16px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:#166534">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#16a34a" style="width:16px;height:16px;flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span>These cards display <strong>exactly what visitors see right now</strong> on each page's hero section — the real headline, image and call-to-action from the live site.</span>
   </div>
 
   <div style="padding:20px;width:100%;box-sizing:border-box">
     <div class="banner-cards-grid">
       <?php foreach ($PAGES as $pkey => $pcfg):
+        // ── Always use the ACTUAL live page hero data from $PAGE_HEROES ──
+        // Never mix in DB slide data so that what is shown here exactly
+        // matches what the visitor sees on the live website.
         $hero  = $PAGE_HEROES[$pkey] ?? [];
-        $p_slides = $slides_by_page[$pkey] ?? [];
-        $active_slide = !empty($p_slides) ? $p_slides[0] : null;
-        // Prefer DB slide image for thumbnail if available, else try asset fallback
-        $slide_img = $active_slide ? $active_slide['display_image_url'] : '';
-        if (!$slide_img && !empty($hero['image_hint'])) {
-            $slide_img = resolve_slide_img('/uploads/slides/' . $hero['image_hint']);
-        }
-        $display_headline = $hero['headline'] ?? ($active_slide['title'] ?? '');
-        $display_eyebrow  = $hero['eyebrow']  ?? ($active_slide['subtitle'] ?? '');
-        $display_copy     = $hero['copy']     ?? ($active_slide['description'] ?? $pcfg['desc']);
-        $display_cta      = $hero['cta_primary'] ?? ($active_slide['button_text'] ?? '');
+        $p_slides       = $slides_by_page[$pkey] ?? [];
+        $active_slide   = !empty($p_slides) ? $p_slides[0] : null;
+
+        // Image: always the real asset used on the live page (image_hint)
+        $slide_img = !empty($hero['image_hint'])
+            ? resolve_slide_img('/uploads/slides/' . $hero['image_hint'])
+            : '';
+
+        // Text: always from the live $PAGE_HEROES definition, no DB fallback
+        $display_headline = $hero['headline']    ?? '';
+        $display_eyebrow  = $hero['eyebrow']     ?? '';
+        $display_copy     = $hero['copy']        ?? $pcfg['desc'];
+        $display_cta      = $hero['cta_primary'] ?? '';
+        $display_cta_sec  = $hero['cta_sec']     ?? '';
       ?>
         <div class="page-banner-card">
           <!-- Banner Image Thumbnail with overlay -->
@@ -379,30 +386,26 @@ include __DIR__ . '/includes/header.php';
 
             <!-- Card Bottom Bar -->
             <div style="border-top:1px solid #f1f5f9;padding-top:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-              <div style="display:flex;align-items:center;gap:6px;min-width:0">
+              <div style="display:flex;align-items:center;gap:4px;min-width:0;flex-wrap:wrap">
                 <?php if ($display_cta): ?>
-                  <span style="font-size:.72rem;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;padding:2px 8px;border-radius:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px">
+                  <span style="font-size:.72rem;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;padding:2px 8px;border-radius:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px" title="<?= htmlspecialchars($display_cta) ?>">
                     <?= htmlspecialchars($display_cta) ?>
                   </span>
-                <?php else: ?>
+                <?php endif; ?>
+                <?php if ($display_cta_sec): ?>
+                  <span style="font-size:.72rem;background:#f0fdf9;color:#0d7a4a;border:1px solid #a7f3d0;padding:2px 8px;border-radius:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px" title="<?= htmlspecialchars($display_cta_sec) ?>">
+                    <?= htmlspecialchars($display_cta_sec) ?>
+                  </span>
+                <?php endif; ?>
+                <?php if (!$display_cta && !$display_cta_sec): ?>
                   <span style="font-size:.72rem;color:var(--muted)">No CTA button</span>
                 <?php endif; ?>
               </div>
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-                <a href="<?= BASE_URL . ltrim($pcfg['route'], '/') ?>" target="_blank" class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:.75rem;display:inline-flex;align-items:center;gap:4px" title="Preview live page">
+                <a href="<?= BASE_URL . '/' . ltrim($pcfg['route'], '/') ?>" target="_blank" class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:.75rem;display:inline-flex;align-items:center;gap:4px" title="View live page">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-                  Preview
+                  View Live
                 </a>
-                <?php if ($active_slide): ?>
-                  <button type="button" class="btn btn-secondary btn-sm" style="padding:4px 9px;font-size:.78rem;display:inline-flex;align-items:center;gap:4px" onclick="editSlide(<?= $active_slide['id'] ?>)">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
-                    Edit DB Slide
-                  </button>
-                <?php else: ?>
-                  <button type="button" class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:.78rem" onclick="openModalForPage('<?= $pkey ?>', '<?= htmlspecialchars($pcfg['name']) ?>')">
-                    + Add Slide
-                  </button>
-                <?php endif; ?>
               </div>
             </div>
 
