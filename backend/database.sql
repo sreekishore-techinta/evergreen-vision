@@ -112,6 +112,7 @@ INSERT INTO `site_settings` (`setting_key`,`setting_val`,`label`,`group_name`,`s
 ('meta_title',        'EVERGREENINDUSTRY | Sustainable Packaging', 'Meta Title',   'seo',      1),
 ('meta_description',  'Biodegradable and compostable packaging solutions designed for responsible businesses.', 'Meta Description', 'seo', 2),
 ('google_analytics',  '',                                    'Analytics Tracking ID (GA4)', 'seo',      3),
+('contact_maps_url',   'https://maps.google.com/maps?q=SIDCO+Industrial+Estate,+N.K.+Road,+Thanjavur+613006&t=&z=15&ie=UTF8&iwloc=&output=embed', 'Google Maps Embed URL', 'contact', 5),
 ('enquiry_notify_email','info@evergreenindustry.com',       'Site Enquiry Notification Email', 'notifications', 1);
 
 -- ─── Admin Activity Log ───────────────────────────────────────

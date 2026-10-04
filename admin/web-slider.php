@@ -200,6 +200,67 @@ foreach ($raw_slides as $s) {
     $slides_by_page[$pkey][] = $s;
 }
 
+// ── Actual current hero content visible on each live page ───────────
+// These match what is hardcoded in the React route components.
+$PAGE_HEROES = [
+    'home' => [
+        'eyebrow'     => 'Let\'s Reduce Plastic',
+        'headline'    => 'Sustainable Packaging for a Greener Tomorrow',
+        'copy'        => 'High-quality biodegradable and compostable packaging solutions for a cleaner, healthier planet.',
+        'cta_primary' => 'Get a Quote',
+        'cta_sec'     => 'WhatsApp Now',
+        'image_hint'  => 'home.png',
+    ],
+    'about' => [
+        'eyebrow'     => 'Our Heritage & Purpose',
+        'headline'    => 'Industry can grow differently.',
+        'copy'        => 'We believe better material decisions can support both commercial business performance and the living world beyond it. Built to provide an honest, scalable path away from petroleum polymers.',
+        'cta_primary' => '',
+        'cta_sec'     => '',
+        'image_hint'  => 'sprout-in-hands.jpg',
+    ],
+    'products' => [
+        'eyebrow'     => 'Commercial-Grade Compostable Packaging',
+        'headline'    => 'Engineered for Enterprise.',
+        'copy'        => 'Explore biodegradable bags and compostable packaging solutions engineered for modern commercial operations.',
+        'cta_primary' => 'View Catalog',
+        'cta_sec'     => '',
+        'image_hint'  => 'product-collection.jpg',
+    ],
+    'segment' => [
+        'eyebrow'     => 'Our Segments & Capabilities',
+        'headline'    => 'Solutions Tailored Across 7 Core Industry Sectors',
+        'copy'        => 'Packaging, Food Service, Agriculture, Horticulture, Medical, Waste Management, and Disposable Cutlery.',
+        'cta_primary' => 'Explore Solutions',
+        'cta_sec'     => '',
+        'image_hint'  => 'solution.png',
+    ],
+    'sustainability' => [
+        'eyebrow'     => 'Our Circular Approach',
+        'headline'    => 'A lifecycle, not a label.',
+        'copy'        => 'We look beyond the product itself—considering material, manufacture, use and what happens next.',
+        'cta_primary' => 'Learn More',
+        'cta_sec'     => '',
+        'image_hint'  => 'substain.png',
+    ],
+    'certificate' => [
+        'eyebrow'     => 'Central Pollution Control Board Approved',
+        'headline'    => 'Official Certification & CPCB Compliance',
+        'copy'        => 'Central Pollution Control Board (CPCB) official government certificate for marketing and selling 100% compostable carry bags compliant with IS/ISO:17088.',
+        'cta_primary' => 'View Certificate',
+        'cta_sec'     => '',
+        'image_hint'  => 'cpcb-certificate.png',
+    ],
+    'contact' => [
+        'eyebrow'     => 'Contact us',
+        'headline'    => "Let's shape a better package.",
+        'copy'        => 'Tell us what your business needs. We\'ll help you explore a more responsible way forward.',
+        'cta_primary' => 'Send Enquiry',
+        'cta_sec'     => '',
+        'image_hint'  => 'evergreen-hero.jpg',
+    ],
+];
+
 $page_title  = 'Web Slider & Hero Sections';
 $breadcrumbs = [['Web Slider', '']];
 include __DIR__ . '/includes/header.php';
@@ -229,33 +290,47 @@ include __DIR__ . '/includes/header.php';
 <div id="flash-zone"></div>
 
 <!-- ══════════════════════════════════════════════════════════
-     LIVE SHOWCASE — CURRENT HERO BANNERS OF ALL PAGES
+     LIVE SHOWCASE — CURRENT HERO SECTIONS (ACTUAL SITE CONTENT)
 ═══════════════════════════════════════════════════════════ -->
 <div class="card" style="margin-bottom:24px;border:1px solid var(--border);box-shadow:var(--shadow-sm)">
   <div class="card-header" style="border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
     <div class="card-title" style="font-size:1.02rem;display:flex;align-items:center;gap:8px">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="var(--green-600)" style="width:20px;height:20px"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
-      <strong>Current Live Web Slider &amp; Hero Banners (All Pages)</strong>
+      <strong>Current Live Hero Sections (All Pages)</strong>
       <span class="badge" style="background:var(--green-100);color:var(--green-700);font-size:.72rem;padding:2px 8px;border-radius:20px"><?= count($PAGES) ?> Pages</span>
     </div>
-    <span class="text-muted text-sm">Click "Edit" on any banner below to change its image or text</span>
+    <span class="text-muted text-sm">Showing the actual content currently visible to site visitors</span>
   </div>
 
-  <div style="padding:20px">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px">
-      <?php foreach ($PAGES as $pkey => $pcfg): ?>
-        <?php
-          $p_slides = $slides_by_page[$pkey] ?? [];
-          $active_slide = !empty($p_slides) ? $p_slides[0] : null;
-          $slide_img = $active_slide ? $active_slide['display_image_url'] : '';
-        ?>
-        <div class="page-banner-card" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .2s;display:flex;flex-direction:column;box-shadow:0 2px 6px rgba(0,0,0,.03)">
+  <!-- Info notice -->
+  <div style="margin:0 20px;margin-top:16px;padding:10px 14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:#92400e">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#d97706" style="width:16px;height:16px;flex-shrink:0;margin-top:1px"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+    <span>These cards show the <strong>actual hero content currently on the live website</strong>. The "Manage Slides" table below controls the database slider entries which can be used to update page hero sections.</span>
+  </div>
+
+  <div style="padding:20px;width:100%;box-sizing:border-box">
+    <div class="banner-cards-grid">
+      <?php foreach ($PAGES as $pkey => $pcfg):
+        $hero  = $PAGE_HEROES[$pkey] ?? [];
+        $p_slides = $slides_by_page[$pkey] ?? [];
+        $active_slide = !empty($p_slides) ? $p_slides[0] : null;
+        // Prefer DB slide image for thumbnail if available, else try asset fallback
+        $slide_img = $active_slide ? $active_slide['display_image_url'] : '';
+        if (!$slide_img && !empty($hero['image_hint'])) {
+            $slide_img = resolve_slide_img('/uploads/slides/' . $hero['image_hint']);
+        }
+        $display_headline = $hero['headline'] ?? ($active_slide['title'] ?? '');
+        $display_eyebrow  = $hero['eyebrow']  ?? ($active_slide['subtitle'] ?? '');
+        $display_copy     = $hero['copy']     ?? ($active_slide['description'] ?? $pcfg['desc']);
+        $display_cta      = $hero['cta_primary'] ?? ($active_slide['button_text'] ?? '');
+      ?>
+        <div class="page-banner-card">
           <!-- Banner Image Thumbnail with overlay -->
           <div style="position:relative;width:100%;height:165px;background:#e2e8f0;overflow:hidden">
             <?php if ($slide_img): ?>
               <img src="<?= htmlspecialchars($slide_img) ?>"
-                   alt="<?= htmlspecialchars($active_slide['title'] ?? $pcfg['name']) ?>"
-                   style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease"
+                   alt="<?= htmlspecialchars($display_headline ?: $pcfg['name']) ?>"
+                   style="width:100%;height:100%;object-fit:cover"
                    class="banner-thumb-img"
                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
               <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;background:var(--sand);color:var(--muted)">
@@ -263,7 +338,7 @@ include __DIR__ . '/includes/header.php';
               </div>
             <?php else: ?>
               <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--sand);color:var(--muted)">
-                <span>No Image Uploaded</span>
+                <span style="font-size:.84rem;font-weight:500">No Image</span>
               </div>
             <?php endif; ?>
 
@@ -274,55 +349,87 @@ include __DIR__ . '/includes/header.php';
               </span>
             </div>
 
-            <!-- Slide Count Badge Overlay -->
+            <!-- Live indicator -->
             <div style="position:absolute;top:10px;right:10px;z-index:2">
-              <span style="background:rgba(0,0,0,.65);color:#fff;font-weight:600;font-size:.7rem;padding:3px 8px;border-radius:12px;backdrop-filter:blur(4px)">
-                <?= count($p_slides) ?> slide<?= count($p_slides) !== 1 ? 's' : '' ?>
+              <span style="background:#16a34a;color:#fff;font-weight:700;font-size:.66rem;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px">
+                <span style="width:5px;height:5px;background:#86efac;border-radius:50%;display:inline-block"></span> LIVE
               </span>
             </div>
+
+            <!-- Gradient overlay for text legibility -->
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 60%);z-index:1"></div>
+            <!-- Eyebrow on image -->
+            <?php if ($display_eyebrow): ?>
+            <div style="position:absolute;bottom:10px;left:12px;right:12px;z-index:2">
+              <span style="font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#86efac"><?= htmlspecialchars($display_eyebrow) ?></span>
+            </div>
+            <?php endif; ?>
           </div>
 
           <!-- Content Details -->
-          <div style="padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:space-between">
+          <div style="padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
             <div>
-              <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--green-700);margin-bottom:3px">
-                <?= htmlspecialchars($active_slide['subtitle'] ?? 'Banner Subtitle') ?>
-              </div>
               <h3 style="font-size:.95rem;font-weight:700;color:var(--ink);line-height:1.3;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
-                <?= htmlspecialchars($active_slide['title'] ?? 'No Headline Set') ?>
+                <?= htmlspecialchars($display_headline ?: 'No Headline') ?>
               </h3>
               <p style="font-size:.8rem;color:var(--muted);line-height:1.45;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
-                <?= htmlspecialchars($active_slide['description'] ?? $pcfg['desc']) ?>
+                <?= htmlspecialchars($display_copy) ?>
               </p>
             </div>
 
             <!-- Card Bottom Bar -->
-            <div style="border-top:1px solid #f1f5f9;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-              <div style="display:flex;align-items:center;gap:6px">
-                <?php if (!empty($active_slide['button_text'])): ?>
-                  <span style="font-size:.72rem;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;padding:2px 8px;border-radius:12px;font-weight:600">
-                    CTA: <?= htmlspecialchars($active_slide['button_text']) ?>
+            <div style="border-top:1px solid #f1f5f9;padding-top:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+              <div style="display:flex;align-items:center;gap:6px;min-width:0">
+                <?php if ($display_cta): ?>
+                  <span style="font-size:.72rem;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;padding:2px 8px;border-radius:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px">
+                    <?= htmlspecialchars($display_cta) ?>
                   </span>
                 <?php else: ?>
-                  <span style="font-size:.72rem;color:var(--muted)">No button</span>
+                  <span style="font-size:.72rem;color:var(--muted)">No CTA button</span>
                 <?php endif; ?>
               </div>
-              <div style="display:flex;gap:6px">
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <a href="<?= BASE_URL . ltrim($pcfg['route'], '/') ?>" target="_blank" class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:.75rem;display:inline-flex;align-items:center;gap:4px" title="Preview live page">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:12px;height:12px"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                  Preview
+                </a>
                 <?php if ($active_slide): ?>
-                  <button type="button" class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:.78rem" onclick="editSlide(<?= $active_slide['id'] ?>)">
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding:4px 9px;font-size:.78rem;display:inline-flex;align-items:center;gap:4px" onclick="editSlide(<?= $active_slide['id'] ?>)">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
-                    Edit Banner
+                    Edit DB Slide
                   </button>
                 <?php else: ?>
                   <button type="button" class="btn btn-primary btn-sm" style="padding:4px 10px;font-size:.78rem" onclick="openModalForPage('<?= $pkey ?>', '<?= htmlspecialchars($pcfg['name']) ?>')">
-                    + Add Banner
+                    + Add Slide
                   </button>
                 <?php endif; ?>
-                <button type="button" class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:.78rem" onclick="filterByPage('<?= $pkey ?>')" title="Filter slides table below">
-                  View (<?= count($p_slides) ?>)
-                </button>
               </div>
             </div>
+
+            <!-- Slide list if multiple slides on this page -->
+            <?php if (count($p_slides) > 1): ?>
+              <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font-size:.71rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">DB Slides (<?= count($p_slides) ?>):</span>
+                  <button type="button" class="btn btn-ghost btn-sm" style="font-size:.7rem;padding:1px 5px;color:var(--green-700)" onclick="openModalForPage('<?= $pkey ?>', '<?= htmlspecialchars($pcfg['name']) ?>')">+ Add Slide</button>
+                </div>
+                <?php foreach ($p_slides as $s_idx => $ps): ?>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:#f8faf8;border:1px solid #eef2ee;border-radius:6px;gap:6px">
+                    <div style="display:flex;align-items:center;gap:6px;overflow:hidden;min-width:0">
+                      <span style="font-size:.68rem;font-weight:700;color:var(--green-700);background:var(--green-100);border-radius:4px;padding:1px 5px;flex-shrink:0">#<?= $s_idx + 1 ?></span>
+                      <span style="font-size:.75rem;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<?= htmlspecialchars($ps['title']) ?>">
+                        <?= htmlspecialchars($ps['title'] ?: 'Slide #'.($s_idx+1)) ?>
+                      </span>
+                    </div>
+                    <div style="display:flex;gap:4px;flex-shrink:0">
+                      <button type="button" class="btn btn-ghost btn-sm" style="padding:2px 7px;font-size:.72rem" onclick="editSlide(<?= $ps['id'] ?>)">Edit</button>
+                      <button type="button" class="btn btn-ghost btn-sm" style="padding:2px 7px;font-size:.72rem;color:#ef4444" onclick="deleteSlide(<?= $ps['id'] ?>, this)" title="Delete slide #<?= $s_idx + 1 ?>">✕ Del</button>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+
           </div>
         </div>
       <?php endforeach; ?>
@@ -353,7 +460,7 @@ include __DIR__ . '/includes/header.php';
   </div>
 
   <!-- Page Filter Tabs -->
-  <div style="padding:12px 20px;border-bottom:1px solid var(--border);background:#fafcfa;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
+  <div style="padding:12px 20px;border-bottom:1px solid var(--border);background:#fafcfa;display:flex;align-items:center;flex-wrap:wrap;gap:8px">
     <span style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Page Filter:</span>
     <button type="button" class="page-filter-pill active" data-page="all" onclick="filterByPage('all')">
       All Pages (<?= count($slides) ?>)
@@ -496,15 +603,21 @@ include __DIR__ . '/includes/header.php';
       </div>
 
       <!-- Modal Footer -->
-      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid #e5e7eb;background:#f9fafb">
-        <div id="modal-spinner" style="display:none;color:#6b7280;font-size:.83rem">
-          <span style="display:inline-block;animation:spin 1s linear infinite">⏳</span> Saving slide…
-        </div>
-        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="modal-submit-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span id="modal-btn-label">Save Slide</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:16px 24px;border-top:1px solid #e5e7eb;background:#f9fafb">
+        <button type="button" id="modal-delete-btn" style="display:none;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:7px 14px;border-radius:8px;font-weight:600;font-size:.82rem;align-items:center;gap:6px;cursor:pointer" onclick="deleteCurrentSlide()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+          Delete This Slide
         </button>
+        <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+          <div id="modal-spinner" style="display:none;color:#6b7280;font-size:.83rem">
+            <span style="display:inline-block;animation:spin 1s linear infinite">⏳</span> Saving slide…
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span id="modal-btn-label">Save Slide</span>
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -517,13 +630,29 @@ include __DIR__ . '/includes/header.php';
 
 <!-- Styles for Web Slider Page -->
 <style>
-.page-banner-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md) !important;
-  border-color: var(--border-dark) !important;
+.banner-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
-.page-banner-card:hover .banner-thumb-img {
-  transform: scale(1.04);
+.page-banner-card {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 6px rgba(0,0,0,.03);
+  transition: box-shadow .2s ease, border-color .2s ease;
+}
+.page-banner-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,.08) !important;
+  border-color: var(--green-400) !important;
 }
 .page-filter-pill {
   padding: 6px 14px;
@@ -534,7 +663,7 @@ include __DIR__ . '/includes/header.php';
   background: #fff;
   color: var(--ink);
   cursor: pointer;
-  transition: all .15s;
+  transition: background .15s, border-color .15s, color .15s;
   white-space: nowrap;
 }
 .page-filter-pill:hover {
@@ -557,6 +686,26 @@ include __DIR__ . '/includes/header.php';
 .alert-slide.success { background:#f0fdf4; border:1px solid #86efac; color:#166534; }
 .alert-slide.error   { background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Prevent any horizontal blowout in slider page */
+#slides-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+.table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 640px) {
+  .banner-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -609,6 +758,9 @@ function openModal(slide = null) {
   document.getElementById('modal-sub').textContent = 'Fill in slide details and select or upload an image';
   document.getElementById('modal-btn-label').textContent = 'Save Slide';
 
+  const delBtn = document.getElementById('modal-delete-btn');
+  if (delBtn) delBtn.style.display = 'none';
+
   if (activePageFilter !== 'all') {
     document.getElementById('f-page-key').value = activePageFilter;
     syncPageName(activePageFilter);
@@ -627,6 +779,8 @@ function openModal(slide = null) {
     document.getElementById('f-btn-text').value = slide.button_text || '';
     document.getElementById('f-btn-url').value = slide.button_url || '';
     document.getElementById('f-image-url-raw').value = slide.image_url || '';
+
+    if (delBtn) delBtn.style.display = 'inline-flex';
 
     const isAct = slide.is_active !== undefined ? String(slide.is_active) : '1';
     const rad = document.querySelector(`input[name="is_active"][value="${isAct}"]`);
@@ -653,6 +807,8 @@ function openModalForPage(pkey, pname) {
 function closeModal() {
   document.getElementById('slide-modal').style.display = 'none';
   document.body.style.overflow = '';
+  const delBtn = document.getElementById('modal-delete-btn');
+  if (delBtn) delBtn.style.display = 'none';
 }
 
 document.getElementById('slide-modal').addEventListener('click', function(e) {
@@ -743,7 +899,7 @@ async function submitSlide(e) {
 // ── Delete Slide ─────────────────────────────────────────────
 async function deleteSlide(id, btn) {
   if (!confirm('Are you sure you want to delete this slide permanently?')) return;
-  btn.disabled = true;
+  if (btn) btn.disabled = true;
   try {
     const res = await fetch(`${SLIDER_API}?action=delete&id=${id}`, { method: 'POST', credentials: 'include' });
     const json = await res.json();
@@ -754,7 +910,29 @@ async function deleteSlide(id, btn) {
     setTimeout(() => window.location.reload(), 800);
   } catch(err) {
     flash('Error: ' + err.message, 'error');
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── Delete Slide from Modal ──────────────────────────────────
+async function deleteCurrentSlide() {
+  const id = document.getElementById('slide-id').value;
+  if (!id) return;
+  if (!confirm('Are you sure you want to permanently delete this slide?')) return;
+  const btn = document.getElementById('modal-delete-btn');
+  if (btn) btn.disabled = true;
+  try {
+    const res = await fetch(`${SLIDER_API}?action=delete&id=${id}`, { method: 'POST', credentials: 'include' });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message);
+    slides = slides.filter(s => s.id != id);
+    closeModal();
+    flash('Slide deleted successfully.');
+    refreshTable();
+    setTimeout(() => window.location.reload(), 700);
+  } catch(err) {
+    flash('Error: ' + err.message, 'error');
+    if (btn) btn.disabled = false;
   }
 }
 

@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState, useRef } from "react";
+import { motion } from "motion/react";
 import {
   ArrowRight,
   Award,
@@ -74,215 +73,96 @@ const TRUST_ITEMS = [
 ] as const;
 
 /* ══════════════════════════════════════════════════════════════════════════
-   HERO SLIDER — fetches slides from DB API; falls back to static image
-   ══════════════════════════════════════════════════════════════════════════ */
-type HeroSlide = {
-  id: number;
-  title: string;
-  subtitle: string;
-  description: string;
-  button_text: string;
-  button_url: string;
-  image_url: string;
-  is_active: number;
-  sort_order: number;
-};
-
-function HeroSlider() {
-  const [slides, setSlides]   = useState<HeroSlide[]>([]);
-  const [current, setCurrent] = useState(0);
-  const timerRef              = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Detect API base (works for both local XAMPP and Vite dev)
-  const API_BASE = typeof window !== "undefined"
-    ? window.location.origin + (window.location.pathname.includes("/evergreen-vision") ? "/evergreen-vision" : "")
-    : "";
-
-  useEffect(() => {
-    fetch(`${API_BASE}/backend/api/slider.php?active=1&page=home`)
-      .then(r => r.json())
-      .then(json => { if (json.success && json.data?.length) setSlides(json.data); })
-      .catch(() => { /* silently fall back to static */ });
-  }, [API_BASE]);
-
-  // Auto-advance
-  useEffect(() => {
-    if (slides.length <= 1) return;
-    timerRef.current = setInterval(() => setCurrent(c => (c + 1) % slides.length), 5000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [slides.length]);
-
-  const goTo = (i: number) => {
-    setCurrent(i);
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    timerRef.current = setInterval(() => setCurrent(c => (c + 1) % slides.length), 5000);
-  };
-
-  /* ── No DB slides → static fallback ──────────────────── */
-  if (slides.length === 0) {
-    return (
-      <div className="relative w-full overflow-hidden" style={{ minHeight: "clamp(460px, 52vw, 700px)" }}>
-        <img
-          src={heroHeroImg}
-          alt="Evergreen Industry sustainable packaging hero"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-        />
-        <div
-          className="relative z-10 flex h-full flex-col justify-center px-6 py-14 sm:px-10 lg:px-16 xl:px-20"
-          style={{ minHeight: "clamp(460px, 52vw, 700px)" }}
-        >
-          <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-            className="mb-4 text-[10.5px] font-bold uppercase tracking-[0.28em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]">
-            Let's Reduce Plastic
-          </motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1 }}
-            className="max-w-[12ch] text-[2.6rem] font-extrabold leading-[1.07] tracking-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)] sm:text-[3.2rem] lg:text-[4rem]">
-            Sustainable<br />Packaging<br />
-            for a <span className="text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)]">Greener<br className="hidden sm:block" /> Tomorrow</span>
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.22 }}
-            className="mt-5 max-w-[38ch] text-[13.5px] leading-[1.75] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.8)] sm:text-sm">
-            High-quality biodegradable and compostable packaging<br className="hidden sm:block" />
-            solutions for a cleaner, healthier planet.
-          </motion.p>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.32 }}
-            className="mt-7 flex flex-wrap items-center gap-3">
-            <Link to="/contact" className="inline-flex items-center gap-2 rounded-full bg-[#1a7a35] px-7 py-3 text-[13.5px] font-bold text-white shadow-[0_4px_20px_rgba(26,122,53,0.45)] transition-all duration-200 hover:bg-[#158030] hover:-translate-y-px">
-              <Leaf className="size-4" />Get a Quote<ArrowRight className="size-4" />
-            </Link>
-            <a href="https://wa.me/917339285437" target="_blank" rel="noopener noreferrer"
-              className="group inline-flex items-center gap-2.5 rounded-full bg-[#25d366] px-7 py-3 text-[13.5px] font-bold text-white shadow-[0_4px_24px_rgba(37,211,102,0.5)] transition-all duration-200 hover:bg-[#20bc5a] hover:-translate-y-0.5">
-              <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white/25">
-                <svg viewBox="0 0 24 24" className="size-3 fill-white" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.102 1.523 5.824L0 24l6.335-1.502A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.728.884.916-3.618-.236-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
-                </svg>
-              </span>
-              WhatsApp Now
-            </a>
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── DB slides → dynamic slider ──────────────────────── */
-  const slide = slides[current];
-  return (
-    <div className="relative w-full overflow-hidden" style={{ minHeight: "clamp(460px, 52vw, 700px)" }}>
-      {/* Slide images */}
-      <AnimatePresence mode="wait">
-        <motion.img
-          key={slide.id + "-img"}
-          src={slide.image_url || heroHeroImg}
-          alt={slide.title}
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          initial={{ opacity: 0, scale: 1.04 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: "easeInOut" }}
-          onError={(e) => { (e.currentTarget as HTMLImageElement).src = heroHeroImg; }}
-        />
-      </AnimatePresence>
-
-      {/* Dark gradient overlay for readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
-
-      {/* Content */}
-      <div
-        className="relative z-10 flex h-full flex-col justify-center px-6 py-14 sm:px-10 lg:px-16 xl:px-20"
-        style={{ minHeight: "clamp(460px, 52vw, 700px)" }}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={slide.id + "-text"}
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.5 }}
-          >
-            {slide.subtitle && (
-              <p className="mb-4 text-[10.5px] font-bold uppercase tracking-[0.28em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]">
-                {slide.subtitle}
-              </p>
-            )}
-            <h1 className="max-w-[16ch] text-[2.6rem] font-extrabold leading-[1.07] tracking-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)] sm:text-[3.2rem] lg:text-[4rem]">
-              {slide.title}
-            </h1>
-            {slide.description && (
-              <p className="mt-5 max-w-[44ch] text-[13.5px] leading-[1.75] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.8)] sm:text-sm">
-                {slide.description}
-              </p>
-            )}
-            {slide.button_text && (
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <Link
-                  to={(slide.button_url?.startsWith("/") ? slide.button_url : "/contact") as any}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#1a7a35] px-7 py-3 text-[13.5px] font-bold text-white shadow-[0_4px_20px_rgba(26,122,53,0.45)] transition-all duration-200 hover:bg-[#158030] hover:-translate-y-px"
-                >
-                  <Leaf className="size-4" />
-                  {slide.button_text}
-                  <ArrowRight className="size-4" />
-                </Link>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Dot navigation */}
-      {slides.length > 1 && (
-        <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === current ? "w-7 bg-white" : "w-2 bg-white/50 hover:bg-white/80"
-              }`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Prev / Next arrows */}
-      {slides.length > 1 && (
-        <>
-          <button
-            onClick={() => goTo((current - 1 + slides.length) % slides.length)}
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white backdrop-blur-sm transition hover:bg-black/50"
-            aria-label="Previous slide"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="size-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </button>
-          <button
-            onClick={() => goTo((current + 1) % slides.length)}
-            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white backdrop-blur-sm transition hover:bg-black/50"
-            aria-label="Next slide"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="size-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
    HOMEPAGE
    ══════════════════════════════════════════════════════════════════════════ */
 function Index() {
   return (
     <main className="overflow-x-hidden bg-white">
 
-      {/* ══ §1 HERO ══════════════════════════════════════════════════════════ */}
+      {/* ══ §1 HERO ══════════════════════════════════════════════════════════
+          Image background · left-aligned content · text readable via local
+          gradient only behind copy area · balanced vertical rhythm
+      ════════════════════════════════════════════════════════════════════════ */}
       <section className="w-full">
-        <HeroSlider />
+        <div className="relative w-full overflow-hidden" style={{ minHeight: "clamp(460px, 52vw, 700px)" }}>
+
+          {/* Full-bleed hero image */}
+          <img
+            src={heroHeroImg}
+            alt="Evergreen Industry sustainable packaging hero"
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+
+          {/* Content column */}
+          <div
+            className="relative z-10 flex h-full flex-col justify-center px-6 py-14 sm:px-10 lg:px-16 xl:px-20"
+            style={{ minHeight: "clamp(460px, 52vw, 700px)" }}
+          >
+            {/* Eyebrow */}
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="mb-4 text-[10.5px] font-bold uppercase tracking-[0.28em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]"
+            >
+              Let's Reduce Plastic
+            </motion.p>
+
+            {/* Headline — strong hierarchy, tight leading */}
+            <motion.h1
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.1 }}
+              className="max-w-[12ch] text-[2.6rem] font-extrabold leading-[1.07] tracking-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)] sm:text-[3.2rem] lg:text-[4rem]"
+            >
+              Sustainable<br />Packaging<br />
+              for a <span className="text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.75)]">Greener<br className="hidden sm:block" /> Tomorrow</span>
+            </motion.h1>
+
+            {/* Sub-copy */}
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.22 }}
+              className="mt-5 max-w-[38ch] text-[13.5px] leading-[1.75] text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.8)] sm:text-sm"
+            >
+              High-quality biodegradable and compostable packaging<br className="hidden sm:block" />
+              solutions for a cleaner, healthier planet.
+            </motion.p>
+
+            {/* CTA row */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.32 }}
+              className="mt-7 flex flex-wrap items-center gap-3"
+            >
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2 rounded-full bg-[#1a7a35] px-7 py-3 text-[13.5px] font-bold text-white shadow-[0_4px_20px_rgba(26,122,53,0.45)] transition-all duration-200 hover:bg-[#158030] hover:-translate-y-px hover:shadow-[0_6px_26px_rgba(26,122,53,0.55)]"
+              >
+                <Leaf className="size-4" />
+                Get a Quote
+                <ArrowRight className="size-4" />
+              </Link>
+
+              <a
+                href="https://wa.me/917339285437"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2.5 rounded-full bg-[#25d366] px-7 py-3 text-[13.5px] font-bold text-white shadow-[0_4px_24px_rgba(37,211,102,0.5)] transition-all duration-200 hover:bg-[#20bc5a] hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(37,211,102,0.65)]"
+              >
+                <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white/25 transition-transform duration-200 group-hover:scale-110">
+                  <svg viewBox="0 0 24 24" className="size-3 fill-white" aria-hidden="true">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.102 1.523 5.824L0 24l6.335-1.502A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.214-3.728.884.916-3.618-.236-.373A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+                  </svg>
+                </span>
+                WhatsApp Now
+              </a>
+            </motion.div>
+          </div>
+        </div>
 
 
         {/* ── §3 TRUST STRIP — equal-height cards, consistent alignment ── */}
