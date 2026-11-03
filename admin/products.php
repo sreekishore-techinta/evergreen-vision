@@ -33,28 +33,105 @@ function get_product_image_url($p): string {
     return rtrim(BASE_URL, '/') . '/' . $clean;
 }
 
+// ── Helper: safely delete an uploaded product image file from disk ──
+function delete_product_image_file(?string $path): void {
+    if (!$path) return;
+    $clean = ltrim($path, '/');
+    if (str_starts_with($clean, 'uploads/products/')) {
+        $root = dirname(__DIR__);
+        $file1 = $root . '/' . $clean;
+        if (is_file($file1)) @unlink($file1);
+        $file2 = $root . '/public/' . $clean;
+        if (is_file($file2)) @unlink($file2);
+    }
+}
+
+// ── Helper: detect uploaded image MIME safely with multi-layer fallbacks ──
+function get_uploaded_image_mime(array $file): string {
+    if (empty($file['tmp_name']) || !is_file($file['tmp_name'])) return '';
+    $mime = '';
+    if (function_exists('finfo_open')) {
+        $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo) {
+            $mime = (string)@finfo_file($finfo, $file['tmp_name']);
+            @finfo_close($finfo);
+        }
+    } elseif (class_exists('finfo')) {
+        try {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime  = (string)$finfo->file($file['tmp_name']);
+        } catch (\Throwable $e) {}
+    }
+    if (!$mime && function_exists('mime_content_type')) {
+        $mime = (string)@mime_content_type($file['tmp_name']);
+    }
+    if (!$mime && function_exists('getimagesize')) {
+        $info = @getimagesize($file['tmp_name']);
+        if ($info && !empty($info['mime'])) {
+            $mime = (string)$info['mime'];
+        }
+    }
+    return strtolower(trim($mime));
+}
+
 // ── Handle image upload via AJAX ─────────────────────────────
-// (products.php also acts as upload target from JS)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'upload_image') {
     header('Content-Type: application/json');
-    if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-        echo json_encode(['success' => false, 'message' => 'Upload failed.']); exit;
+    if (empty($_FILES['image'])) {
+        echo json_encode(['success' => false, 'message' => 'No image file uploaded.']); exit;
     }
-    $file     = $_FILES['image'];
-    $allowed  = ['image/jpeg','image/png','image/webp','image/gif'];
-    $finfo    = new finfo(FILEINFO_MIME_TYPE);
-    $mime     = $finfo->file($file['tmp_name']);
-    if (!in_array($mime, $allowed, true) || $file['size'] > 5*1024*1024) {
-        echo json_encode(['success' => false, 'message' => 'Invalid file or too large (max 5 MB).']); exit;
+    $file = $_FILES['image'];
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        $upload_errors = [
+            UPLOAD_ERR_INI_SIZE   => 'Image exceeds server upload_max_filesize limit.',
+            UPLOAD_ERR_FORM_SIZE  => 'Image exceeds maximum form size limit.',
+            UPLOAD_ERR_PARTIAL    => 'Image was only partially uploaded.',
+            UPLOAD_ERR_NO_FILE    => 'No image was uploaded.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing server temporary folder.',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write image to disk.',
+            UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
+        ];
+        echo json_encode(['success' => false, 'message' => $upload_errors[$file['error']] ?? ('Upload failed with error ' . $file['error'])]);
+        exit;
     }
-    $ext_map  = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp','image/gif'=>'gif'];
-    $ext      = $ext_map[$mime];
-    $dir      = dirname(__DIR__) . '/uploads/products/';
-    if (!is_dir($dir)) mkdir($dir, 0755, true);
-    $fname    = date('Ymd_His') . '_' . bin2hex(random_bytes(5)) . '.' . $ext;
-    move_uploaded_file($file['tmp_name'], $dir . $fname);
-    $url      = BASE_URL . '/uploads/products/' . $fname;
-    echo json_encode(['success' => true, 'url' => $url, 'path' => '/uploads/products/' . $fname]);
+    if ($file['size'] > 10 * 1024 * 1024) {
+        echo json_encode(['success' => false, 'message' => 'File too large (max 10 MB).']); exit;
+    }
+    $mime = get_uploaded_image_mime($file);
+    $ext_from_name = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowed_mimes = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp', 'image/gif'];
+    $allowed_exts  = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    if (!in_array($mime, $allowed_mimes, true) && !in_array($ext_from_name, $allowed_exts, true)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid image format. Allowed: JPEG, PNG, WebP, GIF.']); exit;
+    }
+    $ext = match ($mime) {
+        'image/png', 'image/x-png'               => 'png',
+        'image/webp'                             => 'webp',
+        'image/gif'                              => 'gif',
+        'image/jpeg', 'image/jpg', 'image/pjpeg' => 'jpg',
+        default => ($ext_from_name === 'jpeg' ? 'jpg' : ($ext_from_name ?: 'jpg')),
+    };
+    $root    = dirname(__DIR__);
+    $dir     = $root . '/uploads/products/';
+    $pub_dir = $root . '/public/uploads/products/';
+    if (!is_dir($dir))     @mkdir($dir, 0775, true);
+    if (!is_dir($pub_dir)) @mkdir($pub_dir, 0775, true);
+    if (!is_writable($dir)) @chmod($dir, 0775);
+
+    $fname = date('Ymd_His') . '_' . bin2hex(random_bytes(5)) . '.' . $ext;
+    $dest  = $dir . $fname;
+    if (@move_uploaded_file($file['tmp_name'], $dest)) {
+        @chmod($dest, 0664);
+        if (is_dir($pub_dir)) {
+            @copy($dest, $pub_dir . $fname);
+            @chmod($pub_dir . $fname, 0664);
+        }
+        $url  = BASE_URL . '/uploads/products/' . $fname;
+        $path = '/uploads/products/' . $fname;
+        echo json_encode(['success' => true, 'url' => $url, 'path' => $path]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to save file. Check folder permissions for /uploads/products/.']);
+    }
     exit;
 }
 
@@ -66,12 +143,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         if ($id > 0) {
             // Delete old image file
-            $row = $pdo->prepare('SELECT image_path FROM products WHERE id=?');
+            $row = $pdo->prepare('SELECT image_path, image_url FROM products WHERE id=?');
             $row->execute([$id]);
             $p = $row->fetch();
-            if ($p && $p['image_path']) {
-                $abs = dirname(__DIR__) . $p['image_path'];
-                if (file_exists($abs)) @unlink($abs);
+            if ($p && !empty($p['image_path'])) {
+                delete_product_image_file($p['image_path']);
             }
             $pdo->prepare('DELETE FROM products WHERE id=?')->execute([$id]);
             log_activity('product_delete', "Product #$id deleted.");
@@ -104,42 +180,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $cat_name = $cr ? $cr['name'] : '';
             }
 
-            // Handle new image upload
-            $image_path = $_POST['existing_image_path'] ?? '';
-            $image_url  = '';
-            if (!empty($_FILES['product_image']['name'])) {
-                $file    = $_FILES['product_image'];
-                $allowed = ['image/jpeg','image/png','image/webp','image/gif'];
-                $finfo   = new finfo(FILEINFO_MIME_TYPE);
-                $mime    = $finfo->file($file['tmp_name']);
-                if ($file['error'] === UPLOAD_ERR_OK && in_array($mime, $allowed, true) && $file['size'] <= 5*1024*1024) {
-                    $ext_map = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp','image/gif'=>'gif'];
-                    $ext     = $ext_map[$mime];
-                    $dir     = dirname(__DIR__) . '/uploads/products/';
-                    if (!is_dir($dir)) mkdir($dir, 0755, true);
-                    $fname   = date('Ymd_His') . '_' . bin2hex(random_bytes(5)) . '.' . $ext;
-                    if (move_uploaded_file($file['tmp_name'], $dir . $fname)) {
-                        // Remove old image
-                        if ($image_path) {
-                            $abs = dirname(__DIR__) . $image_path;
-                            if (file_exists($abs)) @unlink($abs);
+            // Fetch current product from DB if editing
+            $curr_db_row = null;
+            if ($id > 0) {
+                $cur = $pdo->prepare('SELECT image_path, image_url FROM products WHERE id=?');
+                $cur->execute([$id]);
+                $curr_db_row = $cur->fetch();
+            }
+
+            $remove_image        = !empty($_POST['remove_image']);
+            $existing_image_path = trim($_POST['existing_image_path'] ?? '');
+            $has_new_upload      = !empty($_FILES['product_image']['name']);
+
+            $image_path    = $existing_image_path;
+            $image_url_val = $image_path ? basename($image_path) : ($curr_db_row['image_url'] ?? '');
+
+            // Case A: User explicitly clicked "Remove Image" and did not select a replacement
+            if ($remove_image && !$has_new_upload) {
+                if ($curr_db_row && !empty($curr_db_row['image_path'])) {
+                    delete_product_image_file($curr_db_row['image_path']);
+                } elseif ($existing_image_path) {
+                    delete_product_image_file($existing_image_path);
+                }
+                $image_path    = '';
+                $image_url_val = '';
+            }
+
+            // Case B: User uploaded a new image
+            if ($has_new_upload) {
+                $file = $_FILES['product_image'];
+
+                if ($file['error'] !== UPLOAD_ERR_OK) {
+                    $upload_errors = [
+                        UPLOAD_ERR_INI_SIZE   => 'Image exceeds server upload_max_filesize limit (' . ini_get('upload_max_filesize') . '). Please choose a smaller image (under 5 MB).',
+                        UPLOAD_ERR_FORM_SIZE  => 'Image exceeds maximum form size limit.',
+                        UPLOAD_ERR_PARTIAL    => 'Image was only partially uploaded. Please try again.',
+                        UPLOAD_ERR_NO_FILE    => 'No image was uploaded.',
+                        UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder on server.',
+                        UPLOAD_ERR_CANT_WRITE => 'Failed to write image to disk (server permission issue).',
+                        UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
+                    ];
+                    $flash = $upload_errors[$file['error']] ?? ('Image upload error (code ' . $file['error'] . ').');
+                    $flash_type = 'error';
+                } elseif ($file['size'] > 10 * 1024 * 1024) {
+                    $flash = 'File is too large (max 10 MB). Please upload a smaller image.';
+                    $flash_type = 'error';
+                } else {
+                    $mime = get_uploaded_image_mime($file);
+                    $ext_from_name = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                    $allowed_mimes = [
+                        'image/jpeg', 'image/jpg', 'image/pjpeg',
+                        'image/png', 'image/x-png',
+                        'image/webp',
+                        'image/gif'
+                    ];
+                    $allowed_exts  = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+
+                    $is_valid_mime = in_array($mime, $allowed_mimes, true);
+                    $is_valid_ext  = in_array($ext_from_name, $allowed_exts, true);
+
+                    if ($is_valid_mime || ($is_valid_ext && @getimagesize($file['tmp_name']) !== false)) {
+                        $ext = match ($mime) {
+                            'image/png', 'image/x-png'               => 'png',
+                            'image/webp'                             => 'webp',
+                            'image/gif'                              => 'gif',
+                            'image/jpeg', 'image/jpg', 'image/pjpeg' => 'jpg',
+                            default => ($ext_from_name === 'jpeg' ? 'jpg' : ($ext_from_name ?: 'jpg')),
+                        };
+
+                        $root    = dirname(__DIR__);
+                        $dir     = $root . '/uploads/products/';
+                        $pub_dir = $root . '/public/uploads/products/';
+
+                        if (!is_dir($dir))     @mkdir($dir, 0775, true);
+                        if (!is_dir($pub_dir)) @mkdir($pub_dir, 0775, true);
+                        if (!is_writable($dir)) @chmod($dir, 0775);
+
+                        $fname = date('Ymd_His') . '_' . bin2hex(random_bytes(5)) . '.' . $ext;
+                        $dest  = $dir . $fname;
+
+                        if (@move_uploaded_file($file['tmp_name'], $dest)) {
+                            @chmod($dest, 0664);
+                            if (is_dir($pub_dir)) {
+                                @copy($dest, $pub_dir . $fname);
+                                @chmod($pub_dir . $fname, 0664);
+                            }
+
+                            // Delete previous image file from server
+                            if ($curr_db_row && !empty($curr_db_row['image_path'])) {
+                                delete_product_image_file($curr_db_row['image_path']);
+                            } elseif ($existing_image_path) {
+                                delete_product_image_file($existing_image_path);
+                            }
+
+                            $image_path    = '/uploads/products/' . $fname;
+                            $image_url_val = $fname;
+                        } else {
+                            $flash = 'Failed to save image. Please check folder permissions on server for /uploads/products/ (CHMOD 775 or 777).';
+                            $flash_type = 'error';
                         }
-                        $image_path = '/uploads/products/' . $fname;
-                        $image_url  = BASE_URL . $image_path;
                     } else {
-                        $flash = 'Image upload failed. Check folder permissions.';
+                        $flash = 'Invalid image format. Allowed formats: JPEG, PNG, WebP, GIF.';
                         $flash_type = 'error';
                     }
-                } else {
-                    $flash = 'Invalid image or file too large (max 5 MB). Only JPEG, PNG, WebP, GIF allowed.';
-                    $flash_type = 'error';
                 }
             }
 
             if ($flash_type !== 'error') {
                 $slug = product_slug($name, $pdo, $id);
-
-                $image_url_val = $image_path ? basename($image_path) : '';
 
                 if ($id > 0) {
                     $pdo->prepare(
@@ -189,6 +337,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Redirect to avoid re-POST on refresh
                 header('Location: products.php?flash=' . urlencode($flash));
                 exit;
+            } else {
+                // Keep form populated and open on error
+                $edit_row = [
+                    'id'             => $id,
+                    'name'           => $name,
+                    'category_id'    => $category_id,
+                    'description'    => $_POST['description'] ?? '',
+                    'features'       => $_POST['features'] ?? '',
+                    'applications'   => $_POST['applications'] ?? '',
+                    'certifications' => $_POST['certifications'] ?? '',
+                    'image_path'     => $image_path,
+                    'image_url'      => $image_url_val,
+                    'sort_order'     => (int)($_POST['sort_order'] ?? 0),
+                    'is_featured'    => isset($_POST['is_featured']) ? 1 : 0,
+                    'is_active'      => isset($_POST['is_active']) ? 1 : 0,
+                ];
+                $show_form = true;
             }
         }
     }
@@ -222,14 +387,18 @@ $categories = $pdo->query(
 )->fetchAll();
 
 // Edit row
-$edit_id  = (int)($_GET['edit'] ?? 0);
-$edit_row = null;
-if ($edit_id > 0) {
-    $s = $pdo->prepare('SELECT * FROM products WHERE id=?');
-    $s->execute([$edit_id]);
-    $edit_row = $s->fetch();
+$edit_id  = (int)($_GET['edit'] ?? ($_POST['id'] ?? 0));
+if (!isset($edit_row)) {
+    $edit_row = null;
+    if ($edit_id > 0) {
+        $s = $pdo->prepare('SELECT * FROM products WHERE id=?');
+        $s->execute([$edit_id]);
+        $edit_row = $s->fetch() ?: null;
+    }
 }
-$show_form = isset($_GET['new']) || $edit_row !== null;
+if (!isset($show_form)) {
+    $show_form = isset($_GET['new']) || $edit_row !== null;
+}
 
 $page_title  = 'Products';
 $breadcrumbs = [['Products', '']];
@@ -274,7 +443,6 @@ include __DIR__ . '/includes/header.php';
     <form method="POST" action="products.php" enctype="multipart/form-data" id="productForm">
       <input type="hidden" name="action" value="save">
       <?php if ($edit_row): ?><input type="hidden" name="id" value="<?= $edit_row['id'] ?>"><?php endif; ?>
-      <input type="hidden" name="existing_image_path" value="<?= htmlspecialchars($edit_row['image_path'] ?? '') ?>" id="existing_image_path">
 
       <div class="grid-2">
         <!-- Name -->
@@ -337,6 +505,7 @@ include __DIR__ . '/includes/header.php';
                  alt="Preview"
                  style="max-height:180px;max-width:100%;border-radius:10px;object-fit:cover;border:2px solid var(--border)">
             <input type="hidden" name="existing_image_path" id="existing_image_path" value="<?= htmlspecialchars($edit_row['image_path'] ?? ($edit_row['image_url'] ?? '')) ?>">
+            <input type="hidden" name="remove_image" id="remove_image" value="0">
             <button type="button" id="removeImg" class="btn btn-danger btn-sm" style="margin-top:8px;<?= empty($current_img) ? 'display:none;' : 'display:inline-flex;' ?>">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:13px;height:13px"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               Remove Image
@@ -356,7 +525,7 @@ include __DIR__ . '/includes/header.php';
               <span style="font-size:.88rem;font-weight:600;color:var(--ink)">Click to upload</span>
               <span style="font-size:.82rem;color:var(--muted)"> or drag &amp; drop</span>
             </div>
-            <span style="font-size:.74rem;color:var(--muted)">JPEG, PNG, WebP, GIF · Max 5 MB</span>
+            <span style="font-size:.74rem;color:var(--muted)">JPEG, PNG, WebP, GIF · Max 10 MB</span>
             <input type="file" name="product_image" id="product_image"
                    accept="image/jpeg,image/png,image/webp,image/gif"
                    style="display:none">
@@ -370,7 +539,7 @@ include __DIR__ . '/includes/header.php';
             <div id="uploadStatus" style="font-size:.76rem;color:var(--muted);margin-top:6px"></div>
           </div>
         </div>
-        <div class="form-hint">Recommended: 800×600px or 16:10 ratio · Replaces existing image when changed</div>
+        <div class="form-hint">Recommended: 800×600px or 16:10 ratio · JPEG, PNG, WebP, GIF (Max 10 MB) · Replaces existing image when changed</div>
       </div>
 
       <!-- Sort Order -->
@@ -515,58 +684,88 @@ include __DIR__ . '/includes/header.php';
 
 <script>
 (function(){
-  const fileInput  = document.getElementById('product_image');
-  const dropZone   = document.getElementById('uploadDrop');
-  const preview    = document.getElementById('imgPreview');
-  const previewWrap= document.getElementById('imgPreviewWrap');
-  const removeBtn  = document.getElementById('removeImg');
+  const fileInput     = document.getElementById('product_image');
+  const dropZone      = document.getElementById('uploadDrop');
+  const preview       = document.getElementById('imgPreview');
+  const previewWrap   = document.getElementById('imgPreviewWrap');
+  const removeBtn     = document.getElementById('removeImg');
   const existingInput = document.getElementById('existing_image_path');
-  const progressWrap  = document.getElementById('uploadProgress');
-  const progressBar   = document.getElementById('uploadBar');
-  const progressStatus= document.getElementById('uploadStatus');
+  const removeFlag    = document.getElementById('remove_image');
 
   if (!fileInput) return;
 
   // Drag & drop styling
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor='var(--green-500)'; dropZone.style.background='var(--green-50)'; });
-  dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor=''; dropZone.style.background=''; });
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.style.borderColor = 'var(--green-500)';
+    dropZone.style.background = 'var(--green-50)';
+  });
+  dropZone.addEventListener('dragleave', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.style.borderColor = '';
+    dropZone.style.background = '';
+  });
   dropZone.addEventListener('drop', e => {
     e.preventDefault();
-    dropZone.style.borderColor=''; dropZone.style.background='';
+    e.stopPropagation();
+    dropZone.style.borderColor = '';
+    dropZone.style.background = '';
     const files = e.dataTransfer.files;
-    if (files.length) { const dt = new DataTransfer(); dt.items.add(files[0]); fileInput.files = dt.files; handleFileSelect(files[0]); }
+    if (files.length) {
+      const dt = new DataTransfer();
+      dt.items.add(files[0]);
+      fileInput.files = dt.files;
+      handleFileSelect(files[0]);
+    }
   });
 
   fileInput.addEventListener('change', () => {
-    if (fileInput.files[0]) handleFileSelect(fileInput.files[0]);
+    if (fileInput.files && fileInput.files[0]) {
+      handleFileSelect(fileInput.files[0]);
+    }
   });
 
   function handleFileSelect(file) {
-    if (!file.type.startsWith('image/')) { alert('Please select an image file.'); return; }
-    if (file.size > 5 * 1024 * 1024) { alert('File must be under 5 MB.'); return; }
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file (JPEG, PNG, WebP, GIF).');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File must be under 10 MB.');
+      return;
+    }
+
+    // Reset remove flag since a file was chosen
+    if (removeFlag) removeFlag.value = '0';
 
     // Show instant local preview
     const reader = new FileReader();
     reader.onload = e => {
       preview.src = e.target.result;
       previewWrap.style.display = 'block';
+      if (removeBtn) removeBtn.style.display = 'inline-flex';
     };
     reader.readAsDataURL(file);
   }
 
   // Remove image
   if (removeBtn) {
-    removeBtn.addEventListener('click', () => {
+    removeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       preview.src = '';
       previewWrap.style.display = 'none';
-      existingInput.value = '';
-      fileInput.value = '';
+      if (existingInput) existingInput.value = '';
+      if (fileInput) fileInput.value = '';
+      if (removeFlag) removeFlag.value = '1';
     });
   }
 
   // Auto-hide flash message
   const flash = document.getElementById('flash-msg');
-  if (flash) setTimeout(() => { flash.style.opacity='0'; flash.style.transition='opacity .5s'; setTimeout(()=>flash.remove(),500); }, 3500);
+  if (flash) setTimeout(() => { flash.style.opacity='0'; flash.style.transition='opacity .5s'; setTimeout(()=>flash.remove(),500); }, 4000);
 })();
 </script>
 

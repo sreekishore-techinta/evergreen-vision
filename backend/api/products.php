@@ -84,17 +84,19 @@ function create_product(): void {
 
     $stmt = $pdo->prepare(
         'INSERT INTO products
-         (name, slug, category, description, features, applications, image_url, certifications, is_featured, is_active, sort_order)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?)'
+         (name, slug, category_id, category, description, features, applications, image_url, image_path, certifications, is_featured, is_active, sort_order)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
     );
     $stmt->execute([
         sanitize($body['name']),
         $slug,
+        !empty($body['category_id']) ? (int)$body['category_id'] : null,
         sanitize($body['category'] ?? ''),
         sanitize($body['description'] ?? ''),
         sanitize($body['features'] ?? ''),
         sanitize($body['applications'] ?? ''),
         sanitize($body['image_url'] ?? ''),
+        sanitize($body['image_path'] ?? ''),
         sanitize($body['certifications'] ?? ''),
         (int)(bool)($body['is_featured'] ?? false),
         (int)(bool)($body['is_active'] ?? true),
@@ -120,17 +122,19 @@ function update_product(): void {
     $pdo  = db();
     $stmt = $pdo->prepare(
         'UPDATE products SET
-           name=?, category=?, description=?, features=?, applications=?,
-           image_url=?, certifications=?, is_featured=?, is_active=?, sort_order=?
+           name=?, category_id=?, category=?, description=?, features=?, applications=?,
+           image_url=?, image_path=?, certifications=?, is_featured=?, is_active=?, sort_order=?
          WHERE id=?'
     );
     $stmt->execute([
         sanitize($body['name']),
+        !empty($body['category_id']) ? (int)$body['category_id'] : null,
         sanitize($body['category'] ?? ''),
         sanitize($body['description'] ?? ''),
         sanitize($body['features'] ?? ''),
         sanitize($body['applications'] ?? ''),
         sanitize($body['image_url'] ?? ''),
+        sanitize($body['image_path'] ?? ''),
         sanitize($body['certifications'] ?? ''),
         (int)(bool)($body['is_featured'] ?? false),
         (int)(bool)($body['is_active'] ?? true),
@@ -149,6 +153,22 @@ function delete_product(): void {
     if ($id < 1) json_err('Invalid ID.');
 
     $pdo  = db();
+
+    // Remove uploaded image file if present
+    $row = $pdo->prepare('SELECT image_path FROM products WHERE id = ?');
+    $row->execute([$id]);
+    $p = $row->fetch();
+    if ($p && !empty($p['image_path'])) {
+        $clean = ltrim($p['image_path'], '/');
+        if (str_starts_with($clean, 'uploads/products/')) {
+            $root = dirname(__DIR__, 2);
+            $abs1 = $root . '/' . $clean;
+            if (is_file($abs1)) @unlink($abs1);
+            $abs2 = $root . '/public/' . $clean;
+            if (is_file($abs2)) @unlink($abs2);
+        }
+    }
+
     $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
     $stmt->execute([$id]);
     if ($stmt->rowCount() === 0) json_err('Product not found.', 404);
